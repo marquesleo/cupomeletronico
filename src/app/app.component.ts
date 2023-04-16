@@ -1,10 +1,42 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 
-@Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
-})
+import { AccountService } from './services/account.service'; 
+import { User } from './models';
+import { Router } from '@angular/router';
+//import { NgxIndexedDBService } from 'ngx-indexed-db';
+
+@Component({ selector: 'app', templateUrl: 'app.component.html' })
 export class AppComponent {
-  title = 'cupomeletronico-pwa';
+     user: User;
+     online: boolean = navigator.onLine;
+     constructor(private accountService: AccountService) {
+
+        this.accountService.user.subscribe(x => this.user = x);
+
+    }
+
+    ngOnInit() {
+        this.online = navigator.onLine;
+      }
+
+    logout() {
+        this.accountService.logout();
+    }
+
+    syncData() {
+        console.log('sincronizando');
+      }
+
+    @HostListener('window:online', ['$event'])
+    onOnline(event: Event) {
+      this.online = true;
+      this.syncData();
+    }
+  
+    @HostListener('window:offline', ['$event'])
+    onOffline(event: Event) {
+      this.online = false;
+    }
+
+
 }
