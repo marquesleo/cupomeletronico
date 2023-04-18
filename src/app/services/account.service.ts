@@ -13,13 +13,15 @@ export class AccountService {
     private userSubject: BehaviorSubject<User>;
     public user: Observable<User>;
     localStorage: Storage;
+    private usercupomeletronico :string  = "user-orcamento"
+
     constructor(
         private router: Router,
         private http: HttpClient,
         
     ) {
         this.localStorage = window.localStorage;
-        var item = JSON.parse(localStorage.getItem('user-orcamento') || '{}');
+        var item = JSON.parse(localStorage.getItem(this.usercupomeletronico) || '{}');
         this.userSubject = new BehaviorSubject<User>(item);
         this.user = this.userSubject.asObservable();
     }
@@ -82,16 +84,15 @@ export class AccountService {
         document.cookie = `${name}=${value}; ${expires}${cpath}`;
     }
 
-    login(username:String, password:String) {
+    login(qrCode:string) {
       
        
-            var usuario: String = username;
-            var senha: String = password;
+           
          
         
       
         return this.http.post<User>(`${environment.apiUrl}/usuario/Logar`, 
-            {  usuario,  senha })
+            {  qrCode })
             .pipe(          
                 map(user => {
                   
@@ -99,8 +100,8 @@ export class AccountService {
                         // store user details and jwt token in local storage to keep user logged in between page refreshes
                         this.setUser(user,user.token);
                         this.userSubject.next(user);
-                        this.setCookie("refreshToken",user.token,7);
-                        this.startRefreshTokenTimer();
+                        //this.setCookie("refreshToken",user.token,7);
+                        //this.startRefreshTokenTimer();
                     }
                 return user;
             }
@@ -159,7 +160,7 @@ export class AccountService {
                 if (id == this.userValue.Id) {
                     // update local storage
                     const user = { ...this.userValue, ...params };
-                    localStorage.setItem('orcamento', JSON.stringify(user));
+                    localStorage.setItem(this.usercupomeletronico, JSON.stringify(user));
 
                     // publish updated user to subscribers
                     this.userSubject.next(user);
