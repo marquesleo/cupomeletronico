@@ -13,7 +13,7 @@ export class AccountService {
     private userSubject: BehaviorSubject<User>;
     public user: Observable<User>;
     localStorage: Storage;
-    private usercupomeletronico :string  = "user-orcamento"
+    private usercupomeletronico :string  = "user-cupomfiscal"
 
     constructor(
         private router: Router,
@@ -86,13 +86,13 @@ export class AccountService {
 
     login(qrCode:string) {
       
-       
-           
-         
-        
-      
-        return this.http.post<User>(`${environment.apiUrl}/usuario/Logar`, 
-            {  qrCode })
+        const usuario = { 
+             id:0,
+            nome:"",
+            qrcode:qrCode
+            
+        };
+        return this.http.post<User>(`${environment.apiUrl}/v1/usuario/autenticar`, usuario)
             .pipe(          
                 map(user => {
                   
@@ -100,8 +100,8 @@ export class AccountService {
                         // store user details and jwt token in local storage to keep user logged in between page refreshes
                         this.setUser(user,user.token);
                         this.userSubject.next(user);
-                        //this.setCookie("refreshToken",user.token,7);
-                        //this.startRefreshTokenTimer();
+                        this.setCookie("refreshToken",user.token,7);
+                        this.startRefreshTokenTimer();
                     }
                 return user;
             }

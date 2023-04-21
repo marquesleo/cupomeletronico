@@ -60,13 +60,10 @@ onScanSuccess(qrCode: Event) {
 
 ngOnInit() {
   this.form = this.formBuilder.group({
-      username: ['', Validators.required],
-      password: ['', Validators.required]
-  });
-  
-
-
-}
+      username: ['1', Validators.required],
+      combo: ['',Validators.required]
+    });
+  }
 
 // convenience getter for easy access to form fields
 get f() { return this.form.controls; }

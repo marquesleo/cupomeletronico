@@ -5,4 +5,5 @@ export class User {
     Password: string = '';
     token: string = '';
     isDeleting: boolean = false;
+    qrCode:string='';
 }
