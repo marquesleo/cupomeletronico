@@ -15,19 +15,23 @@
   <button mat-menu-item>
         <mat-icon>
           <span class="material-symbols-outlined">
-          attach_money
-          </span>
+            quick_reference_all
+            </span>
+
+        
         </mat-icon>
-        <span><a  routerLink="/caixa" routerLinkActive="active">Caixa</a></span>
+        <span><a  routerLink="/cupomeletronico" routerLinkActive="active">Cupom Eletrônico</a></span>
       </button>
      <!--<button mat-menu-item>
         <mat-icon>videocam</mat-icon>
         <span>Let's talk</span>
       </button>-->
-      <button mat-menu-item>
-        <mat-icon>exit_to_app</mat-icon>
-        <span><a (click)="logout()">Logout</a></span>
-      </button>
+      <div *ngIf="isLogado()">
+         <button mat-menu-item>
+            <mat-icon>exit_to_app</mat-icon>
+            <span><a (click)="logout()">Logout</a></span>
+         </button>
+      </div>
   </span>
   </mat-menu>
   </span>

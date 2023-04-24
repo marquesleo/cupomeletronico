@@ -17,7 +17,16 @@ export class AppComponent {
 
     ngOnInit() {
         this.online = navigator.onLine;
-      }
+    }
+
+    isLogado():boolean{
+      if (this.accountService.userValue.Id && 
+          this.accountService.userValue.Id > 0)
+          return true;
+
+          
+      return false;    
+    }
 
     logout() {
         this.accountService.logout();

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
@@ -32,16 +32,36 @@ export class AccountService {
 
     refreshToken() {
         var url = environment.apiUrl;
-        var token = this.getCookie("refreshToken");
+        var refreshtoken = this.getCookie("refreshToken-cupomeletronico");
+        const reqHeader = new HttpHeaders().set("Content-type","application/json")
+        .set("Accept","application/json");
 
-        return this.http.post<any>(`${url}/usuario/refresh-token/${token}`, 
-            {})
+        var accesstoken: string =   '';
+        if (this.userSubject.value.token)
+            accesstoken = this.userSubject.value.token;
+       
+        if (refreshtoken === 'undefined')
+            refreshtoken = ''
+
+         var idusuario = 0; 
+
+         if (this.userSubject.value.Id)
+            idusuario = this.userSubject.value.Id;
+
+        return this.http.post<any>(`${url}/v1/usuario/refresh-token/`, 
+            {idusuario, accesstoken,refreshtoken},{ headers: reqHeader})
             .pipe(map((user) => {
                
-                this.userSubject.next(user);
+                if (user) {
+                 this.setUser(user,user.token);
+                 this.userSubject.next(user);
+                // this.cookieService.delete("refreshToken-cupomeletronico");
+                this.setCookie("refreshToken",user.RefreshToken,7);
                 this.startRefreshTokenTimer();
+                }
                 return user;
             }));
+        
     }
 
     getCookie(name: string) {
@@ -100,7 +120,7 @@ export class AccountService {
                         // store user details and jwt token in local storage to keep user logged in between page refreshes
                         this.setUser(user,user.token);
                         this.userSubject.next(user);
-                        this.setCookie("refreshToken",user.token,7);
+                        this.setCookie("refreshToken-cupomeletronico",user.token,7);
                         this.startRefreshTokenTimer();
                     }
                 return user;

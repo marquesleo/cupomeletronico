@@ -3,25 +3,29 @@ import { User } from "../models/user";
 
 
 export class Security {
+
+   private static cupomeletronico_usuario:string ="cupomeletronico"
+   private static cupomeletronico_token:string="orcamento-token"
+
     public static set(user: User, token: string) {
         const data = JSON.stringify(user);
 
-        localStorage.setItem('orcamento', btoa(data));
-        localStorage.setItem('orcamento-token', token);
-        localStorage.setItem('user-orcamento',data);
+       
+        localStorage.setItem(this.cupomeletronico_token, token);
+        localStorage.setItem(this.cupomeletronico_usuario,data);
     }
 
     public static setUser(user: User) {
         const data = JSON.stringify(user);
-        localStorage.setItem('orcamento', btoa(data));
+        localStorage.setItem(this.cupomeletronico_usuario, btoa(data));
     }
 
     public static setToken(token: string) {
-        localStorage.setItem('orcamento-token', token);
+        localStorage.setItem(this.cupomeletronico_token, token);
     }
 
     public static getUser(): User {
-        const data = localStorage.getItem('user-orcamento');
+        const data = localStorage.getItem(this.cupomeletronico_usuario);
         if (data) {
             return JSON.parse(atob(data));
         } else {
@@ -30,7 +34,7 @@ export class Security {
     }
 
     public static getToken(): string {
-        const data = localStorage.getItem('user-orcamento');
+        const data = localStorage.getItem(this.cupomeletronico_usuario);
         if (data) {
             return data;
         } else {
@@ -46,7 +50,7 @@ export class Security {
     }
 
     public static clear() {
-        localStorage.removeItem('orcamento');
-        localStorage.removeItem('orcamento-token');
+        localStorage.removeItem(this.cupomeletronico_usuario);
+        localStorage.removeItem(this.cupomeletronico_token);
     }
 }
