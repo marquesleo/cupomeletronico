@@ -7,7 +7,7 @@ import { AccountService } from '../services/account.service';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent  {
 
   user: User;
 
@@ -16,7 +16,6 @@ export class HomeComponent implements OnInit {
         
     }
 
-  ngOnInit(): void {
-  }
+ 
 
 }

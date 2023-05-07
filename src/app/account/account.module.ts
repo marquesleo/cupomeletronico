@@ -6,6 +6,9 @@ import { LoginComponent } from './login/login.component';
 import { AccountRoutingModule } from './account-routing.module';
 import { NgQrScannerModule } from 'angular2-qrscanner';
 import { NgxScannerQrcodeModule } from 'ngx-scanner-qrcode';
+
+
+
 import {
     ScannerQRCodeConfig,
     ScannerQRCodeSelectedFiles,

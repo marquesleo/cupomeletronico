@@ -20,8 +20,8 @@ export class AppComponent {
     }
 
     isLogado():boolean{
-      if (this.accountService.userValue.Id && 
-          this.accountService.userValue.Id > 0)
+      if (this.accountService.userValue.id && 
+          this.accountService.userValue.id > 0)
           return true;
 
           

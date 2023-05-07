@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-
+import { CookieService } from 'ngx-cookie-service';
 import { environment } from '../../environments/environment';
 import { User } from '../models/user';
 import { Security } from '../utils/security.utils';
@@ -18,6 +18,7 @@ export class AccountService {
     constructor(
         private router: Router,
         private http: HttpClient,
+        private cookieService: CookieService
         
     ) {
         this.localStorage = window.localStorage;
@@ -30,7 +31,7 @@ export class AccountService {
         return this.userSubject.value;
     }
 
-    refreshToken() {
+    refreshTokenCupom() {
         var url = environment.apiUrl;
         var refreshtoken = this.getCookie("refreshToken-cupomeletronico");
         const reqHeader = new HttpHeaders().set("Content-type","application/json")
@@ -41,26 +42,28 @@ export class AccountService {
             accesstoken = this.userSubject.value.token;
        
         if (refreshtoken === 'undefined')
-            refreshtoken = ''
+             refreshtoken = ''
 
          var idusuario = 0; 
 
-         if (this.userSubject.value.Id)
-            idusuario = this.userSubject.value.Id;
+         if (this.userSubject.value.id)
+            idusuario = this.userSubject.value.id;
 
+      
         return this.http.post<any>(`${url}/v1/usuario/refresh-token/`, 
             {idusuario, accesstoken,refreshtoken},{ headers: reqHeader})
             .pipe(map((user) => {
                
-                if (user) {
+               if (user){
                  this.setUser(user,user.token);
                  this.userSubject.next(user);
-                // this.cookieService.delete("refreshToken-cupomeletronico");
-                this.setCookie("refreshToken",user.RefreshToken,7);
-                this.startRefreshTokenTimer();
-                }
+                this.cookieService.delete("refreshToken-cupomeletronico");
+                this.setCookie("refreshToken-cupomeletronico",user.refreshToken,7);
+               
+               }
                 return user;
             }));
+        
         
     }
 
@@ -89,7 +92,7 @@ export class AccountService {
         // set a timeout to refresh the token a minute before it expires
         const expires = new Date(jwtToken.exp * 1000);
         const timeout = expires.getTime() - Date.now() - (60 * 1000);
-        this.refreshTokenTimeout = setTimeout(() => this.refreshToken().subscribe(), timeout);
+        this.refreshTokenTimeout = setTimeout(() => this.refreshTokenCupom().subscribe(), timeout);
     }
 
     private stopRefreshTokenTimer() {
@@ -177,7 +180,7 @@ export class AccountService {
         return this.http.put(`${environment.apiUrl}/v1/usuario/${id}`, params)
             .pipe(map(x => {
                 // update stored user if the logged in user updated their own record
-                if (id == this.userValue.Id) {
+                if (id == this.userValue.id) {
                     // update local storage
                     const user = { ...this.userValue, ...params };
                     localStorage.setItem(this.usercupomeletronico, JSON.stringify(user));
@@ -193,7 +196,7 @@ export class AccountService {
         return this.http.delete(`${environment.apiUrl}/v1/usuario/${id}`)
             .pipe(map(x => {
                 // auto logout if the logged in user deleted their own record
-                if (id == this.userValue.Id) {
+                if (id == this.userValue.id) {
                     this.logout();
                 }
                 return x;

@@ -1,4 +1,4 @@
-import { NgModule, isDevMode, CUSTOM_ELEMENTS_SCHEMA, APP_INITIALIZER } from '@angular/core';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA, APP_INITIALIZER } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -27,6 +27,8 @@ import { AccountService } from './services/account.service';
 import { NotFoundComponent } from './componentes/error-pages/not-found/not-found.component';
 import { InternalServerComponent } from './componentes/error-pages/internal-server/internal-server.component';
 import { CorsInterceptor } from './helpers/CorsInterceptor';
+
+
 
 @NgModule({
   declarations: [

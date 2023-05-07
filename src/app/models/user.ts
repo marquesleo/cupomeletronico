@@ -1,7 +1,7 @@
 export class User {
-    Id: number = 0;
+    id: number = 0;
     Email:string ='';
-    Username: string = '';
+    Nome: string = '';
     Password: string = '';
     token: string = '';
     isDeleting: boolean = false;

@@ -3,13 +3,13 @@
     <div class="card-body">
 
 <!-- devices -->
-<div class="row">
-    <div class="col-xs-12 col-md-6 col-lg-4 col-xl-3 my-1">
-      <select [ngModel]="null" (ngModelChange)="action.playDevice($event)" class="form-select form-select-sm">
-        <option [value]="null" selected>Select device</option>
-        <option *ngFor="let c of action.devices.value; let i = index" [ngValue]="c.deviceId" [selected]="i == action.deviceActive">{{c.label}}</option>
-      </select>
-    </div>
+  <div class="row">
+      <div class="col-xs-12 col-md-6 col-lg-4 col-xl-3 my-1">
+        <select [ngModel]="null" (ngModelChange)="action.playDevice($event)" class="form-select form-select-sm">
+          <option [value]="null" selected>Select device</option>
+          <option *ngFor="let c of action.devices.value; let i = index" [ngValue]="c.deviceId" [selected]="i == action.deviceActive">{{c.label}}</option>
+        </select>
+     </div>
   </div>
 
        
