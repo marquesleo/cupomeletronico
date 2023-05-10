@@ -9,6 +9,7 @@ import { NgxScannerQrcodeModule } from 'ngx-scanner-qrcode';
 import { MatToolbarModule} from '@angular/material/toolbar';
 import { MatCardModule} from '@angular/material/card';
 import { MatButtonModule} from '@angular/material/button';
+import { CardComponent } from '../componentes/card/card.component';
 
 @NgModule({
     imports: [
@@ -26,7 +27,7 @@ import { MatButtonModule} from '@angular/material/button';
     declarations: [
         CupomListComponent,
         CupomLayoutComponent,
-        
+        CardComponent
         
     ]
 })

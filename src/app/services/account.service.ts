@@ -13,8 +13,8 @@ export class AccountService {
     private userSubject: BehaviorSubject<User>;
     public user: Observable<User>;
     localStorage: Storage;
-    private usercupomeletronico :string  = "user-cupomfiscal"
-
+    public static usercupomeletronico :string  = "user-cupomfiscal"
+    public static refreshTokencupomeletronico: string = "refreshToken-cupomeletronico";
     constructor(
         private router: Router,
         private http: HttpClient,
@@ -22,7 +22,7 @@ export class AccountService {
         
     ) {
         this.localStorage = window.localStorage;
-        var item = JSON.parse(localStorage.getItem(this.usercupomeletronico) || '{}');
+        var item = JSON.parse(localStorage.getItem(AccountService.usercupomeletronico) || '{}');
         this.userSubject = new BehaviorSubject<User>(item);
         this.user = this.userSubject.asObservable();
     }
@@ -33,7 +33,7 @@ export class AccountService {
 
     refreshTokenCupom() {
         var url = environment.apiUrl;
-        var refreshtoken = this.getCookie("refreshToken-cupomeletronico");
+        var refreshtoken = this.getCookie(AccountService.refreshTokencupomeletronico);
         const reqHeader = new HttpHeaders().set("Content-type","application/json")
         .set("Accept","application/json");
 
@@ -57,8 +57,8 @@ export class AccountService {
                if (user){
                  this.setUser(user,user.token);
                  this.userSubject.next(user);
-                this.cookieService.delete("refreshToken-cupomeletronico");
-                this.setCookie("refreshToken-cupomeletronico",user.refreshToken,7);
+                this.cookieService.delete(AccountService.refreshTokencupomeletronico);
+                this.setCookie(AccountService.refreshTokencupomeletronico,user.refreshToken,7);
                
                }
                 return user;
@@ -123,7 +123,7 @@ export class AccountService {
                         // store user details and jwt token in local storage to keep user logged in between page refreshes
                         this.setUser(user,user.token);
                         this.userSubject.next(user);
-                        this.setCookie("refreshToken-cupomeletronico",user.token,7);
+                        this.setCookie(AccountService.refreshTokencupomeletronico,user.token,7);
                         this.startRefreshTokenTimer();
                     }
                 return user;
@@ -183,7 +183,7 @@ export class AccountService {
                 if (id == this.userValue.id) {
                     // update local storage
                     const user = { ...this.userValue, ...params };
-                    localStorage.setItem(this.usercupomeletronico, JSON.stringify(user));
+                    localStorage.setItem(AccountService. usercupomeletronico, JSON.stringify(user));
 
                     // publish updated user to subscribers
                     this.userSubject.next(user);

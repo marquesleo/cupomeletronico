@@ -5,7 +5,9 @@ import { AlertService } from 'src/app/services/alert.service';
 import { NgxScannerQrcodeComponent, NgxScannerQrcodeService, ScannerQRCodeConfig, ScannerQRCodeResult, ScannerQRCodeSelectedFiles } from 'ngx-scanner-qrcode';
 import { AccountService } from 'src/app/services/account.service';
 import { User } from 'src/app/models';
-
+import { CardData } from 'src/app/models/card';
+import { OperacoesService } from 'src/app/services/operacoes.service';
+import { first } from 'rxjs';
 
 @Component({
   selector: 'app-cupom-list',
@@ -18,8 +20,8 @@ export class CupomListComponent implements AfterViewInit {
   form!: FormGroup ;
   loading = false;
   submitted = false;
-  funcionario:string;
-  gridColumns = 3;
+  public busy: boolean = false;
+
  //  MediaDeviceInfo : MediaDeviceInfo = null!;
  // @ViewChild(QrScannerComponent) qrScannerComponent: QrScannerComponent ;
 
@@ -37,6 +39,46 @@ export class CupomListComponent implements AfterViewInit {
   } 
 };
 
+
+cardData: CardData[] = [
+  {
+    title: 'Card 1',
+    subtitle: 'Subtitle 1',
+    text: 'Text 1',
+    imageUrl: 'https://via.placeholder.com/150'
+  },
+  {
+    title: 'Card 2',
+    subtitle: 'Subtitle 2',
+    text: 'Text 2',
+    imageUrl: 'https://via.placeholder.com/150'
+  },
+  {
+    title: 'Card 3',
+    subtitle: 'Subtitle 3',
+    text: 'Text 3',
+    imageUrl: 'https://via.placeholder.com/150'
+  },
+  {
+    title: 'Card 4',
+    subtitle: 'Subtitle 4',
+    text: 'Text 4',
+    imageUrl: 'https://via.placeholder.com/150'
+  },
+  {
+    title: 'Card 5',
+    subtitle: 'Subtitle 5',
+    text: 'Text 5',
+    imageUrl: 'https://via.placeholder.com/150'
+  },
+  {
+    title: 'Card 6',
+    subtitle: 'Subtitle 6',
+    text: 'Text 6',
+    imageUrl: 'https://via.placeholder.com/150'
+  }
+];
+
 public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
 
 
@@ -48,7 +90,8 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
     private router: Router,
     private alertService: AlertService,
     private qrcode: NgxScannerQrcodeService,
-    private accountService:AccountService
+    private accountService:AccountService,
+    private operacaoService:OperacoesService
     
 ) { }
 
@@ -76,8 +119,26 @@ ngAfterViewInit(): void {
 public onEvent(qrcode: ScannerQRCodeResult[]): void {
   if (qrcode.length > 0){
     const valor = qrcode[0].value;
+    this.Listar(valor);
     
   }
+}
+
+Listar(valor :string):void {
+  this.busy = true;
+ 
+  this.operacaoService.getAll(valor)
+  .pipe(first ())
+  .subscribe((senha:CardData[])=> { 
+      this.cardData = senha;
+      this.busy = false;
+      
+  },
+  (err)=> {
+    this.busy = false;
+    this.alertService.error(err);
+  }
+  );
 }
 
 public handle(action: NgxScannerQrcodeComponent, fn: string): void {

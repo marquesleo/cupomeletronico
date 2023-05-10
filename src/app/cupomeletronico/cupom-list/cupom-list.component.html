@@ -37,7 +37,16 @@
  
    
   <br>
-  
+  <div *ngIf="!cardData">
+   
+        <span class="spinner-border spinner-border-lg align-center"></span>
+        <div class="row">
+          <div class="col-sm-6 col-md-4 col-lg-3" *ngFor="let card of cardData" [ngClass]="{'mb-3': !cardData}">
+            <app-card [cardData]="card"></app-card>
+          </div>
+        </div>
+  </div>
+ 
 
        <!--<button (click)="chamarCamera()">CHAMAR CAMERA</button>
         <button (click)="desahabilitar()">fechar CAMERA</button>
