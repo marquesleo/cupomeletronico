@@ -22,12 +22,14 @@ export class AccountService {
         
     ) {
         this.localStorage = window.localStorage;
-        var item = JSON.parse(localStorage.getItem(AccountService.usercupomeletronico) || '{}');
+        var item = JSON.parse(localStorage.getItem("cupomeletronico") || '{}');
         this.userSubject = new BehaviorSubject<User>(item);
         this.user = this.userSubject.asObservable();
     }
 
     public get userValue(): User {
+
+        
         return this.userSubject.value;
     }
 
@@ -110,7 +112,7 @@ export class AccountService {
     login(qrCode:string) {
       
         const usuario = { 
-             id:0,
+            id:0,
             nome:"",
             qrcode:qrCode
             
@@ -119,13 +121,12 @@ export class AccountService {
             .pipe(          
                 map(user => {
                   
-                    if (user && user.token){
-                        // store user details and jwt token in local storage to keep user logged in between page refreshes
+                       // store user details and jwt token in local storage to keep user logged in between page refreshes
                         this.setUser(user,user.token);
                         this.userSubject.next(user);
                         this.setCookie(AccountService.refreshTokencupomeletronico,user.token,7);
                         this.startRefreshTokenTimer();
-                    }
+                   
                 return user;
             }
           )
@@ -157,7 +158,7 @@ export class AccountService {
         var user: User = new User();
         this.userSubject.next(user);
         this.router.navigate(['/account/login']);
-    }
+     }
 
     setUser(User:User, token:string){
         Security.set(User,token);

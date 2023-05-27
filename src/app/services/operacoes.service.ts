@@ -6,32 +6,25 @@ import { User } from '../models';
 import { CardData } from '../models/card';
 import { AccountService } from './account.service';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class OperacoesService {
 
   private userSubject: BehaviorSubject<User>;
   public user: Observable<User>;
   localStorage: Storage;
   constructor(
-      private http: HttpClient
-  ) {
-       this.user = this.userSubject.asObservable();
-       this.localStorage = window.localStorage;
-       var item = JSON.parse(localStorage.getItem(AccountService.usercupomeletronico) || '{}');
-       this.userSubject = new BehaviorSubject<User>(item);
-       this.user = this.userSubject.asObservable();
+      private http: HttpClient,
+      private accountService: AccountService
+  ) {}
+
+  public get userValue(): any {
+    return this.accountService.userValue;
   }
 
-  private get userValue(): any {
-    return this.userSubject.value;
+  getAll(id_usuario:number) {
+    return this.http.get<CardData[]>(`${environment.apiUrl}/v1/Operacao/${id_usuario}`);
   }
-
-
-  getAll(valor:string) {
-    const id_usuario = this.userValue?.Id;
-       
-     return this.http.get<CardData[]>(`${environment.apiUrl}/v1/Operacao/${id_usuario}`);
- }
+  getByIdPacote(id_pacote:number) {
+    return this.http.get<CardData[]>(`${environment.apiUrl}/v1/Operacao/ObterPorPacote/${id_pacote}`);
+  }
 }

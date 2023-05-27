@@ -4,13 +4,11 @@ import { User } from "../models/user";
 
 export class Security {
 
-   private static cupomeletronico_usuario:string ="cupomeletronico"
-   private static cupomeletronico_token:string="orcamento-token"
+   public static cupomeletronico_usuario:string ="cupomeletronico"
+   public static cupomeletronico_token:string="cupomeletronico-token"
 
     public static set(user: User, token: string) {
         const data = JSON.stringify(user);
-
-       
         localStorage.setItem(this.cupomeletronico_token, token);
         localStorage.setItem(this.cupomeletronico_usuario,data);
     }

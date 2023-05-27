@@ -2,7 +2,6 @@ import { Component, HostListener } from '@angular/core';
 
 import { AccountService } from './services/account.service'; 
 import { User } from './models';
-import { Router } from '@angular/router';
 //import { NgxIndexedDBService } from 'ngx-indexed-db';
 
 @Component({ selector: 'app', templateUrl: 'app.component.html' })

@@ -59,7 +59,7 @@ onScanSuccess(qrCode: Event) {
 
 ngOnInit() {
   this.form = this.formBuilder.group({
-      username: ['1', Validators.required],
+      username: [, Validators.required],
       combo: ['',Validators.required]
     });
   }
@@ -104,6 +104,10 @@ Gravar(codigoQrCode:string) {
   /*if (this.form.invalid) {
       return;
   }*/
+  if (!codigoQrCode){
+     codigoQrCode = this.form.controls["username"].value
+  }
+  
 
   this.loading = true;
   this.accountService.login(codigoQrCode)

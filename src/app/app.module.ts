@@ -27,7 +27,13 @@ import { AccountService } from './services/account.service';
 import { NotFoundComponent } from './componentes/error-pages/not-found/not-found.component';
 import { InternalServerComponent } from './componentes/error-pages/internal-server/internal-server.component';
 import { CorsInterceptor } from './helpers/CorsInterceptor';
-
+import { ConfirmationDialogComponent } from './componentes/confirmation-dialog/confirmation-dialog.component';
+import { ConfirmationDialogService } from './componentes/confirmation-dialog/confirmation-dialog.service';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import { MatDialogModule } from '@angular/material/dialog';
+import { NgxPaginationModule } from 'ngx-pagination';
+import { NgQrScannerModule } from 'angular2-qrscanner';
+import { NgxScannerQrcodeModule } from 'ngx-scanner-qrcode';
 
 
 @NgModule({
@@ -37,7 +43,8 @@ import { CorsInterceptor } from './helpers/CorsInterceptor';
     AlertComponent,
     NotFoundComponent,
     InternalServerComponent,
-    
+    ConfirmationDialogComponent,
+  
     
     
   ],
@@ -53,13 +60,16 @@ import { CorsInterceptor } from './helpers/CorsInterceptor';
     MatButtonModule, 
     MatIconModule, 
     MatRadioModule,
-    
+    MatDialogModule,
     MatInputModule,
     MatMenuModule,
     MatToolbarModule,
     MatDatepickerModule,
     MatNativeDateModule, 
     MatDatepickerModule,
+    NgxPaginationModule,
+    NgQrScannerModule,
+    NgxScannerQrcodeModule,
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: environment.production,
       // Register the ServiceWorker as soon as the application is stable
@@ -69,13 +79,14 @@ import { CorsInterceptor } from './helpers/CorsInterceptor';
     BrowserAnimationsModule
   ],
   providers: [
- 
+    ConfirmationDialogService,
     { provide: HTTP_INTERCEPTORS, useClass: CorsInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
     { provide: APP_INITIALIZER, useFactory: appInitializer, multi: true, deps: [AccountService] },
   ],
+  entryComponents: [ ConfirmationDialogComponent ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA,CUSTOM_ELEMENTS_SCHEMA],
   bootstrap: [AppComponent],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA,CUSTOM_ELEMENTS_SCHEMA]
 })
 export class AppModule { }
