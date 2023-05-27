@@ -6,7 +6,7 @@ import { LoginComponent } from './login/login.component';
 import { AccountRoutingModule } from './account-routing.module';
 import { NgQrScannerModule } from 'angular2-qrscanner';
 import { NgxScannerQrcodeModule } from 'ngx-scanner-qrcode';
-
+import { CardData } from '../models/card';
 
 
 import {
@@ -16,6 +16,7 @@ import {
     ScannerQRCodeResult,
     NgxScannerQrcodeComponent
   } from 'ngx-scanner-qrcode';
+import { CardComponent } from '../componentes/card/card.component';
 @NgModule({
     imports: [
         CommonModule,
@@ -28,6 +29,7 @@ import {
     declarations: [
         LayoutComponent,
         LoginComponent,
+        CardComponent
         
         
     ]

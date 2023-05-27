@@ -80,7 +80,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
     ngOnInit() {
     
       this.user = this.operacaoService.userValue;
-      this.nomeDoOperador = this.user.nome 
+      this.nomeDoOperador = this.user.nome; 
       this.Listar(this.user.id);
       this.form = this.formBuilder.group({
         pacote: [, Validators.required],
