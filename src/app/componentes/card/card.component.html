@@ -9,8 +9,8 @@ style="height: 100%;">
      Seq:{{cardData.sequencia}}<br>
      Qtd:{{ cardData.quantidade }}<br>
      Tempo:{{ cardData.tempoTotal }}<br>
-  
-      <button [disabled]="isDataValida()" type="button" [ngClass]="flag ? 'btn btn-warning' : 'btn btn-danger'"
+   
+      <button [disabled]="cardData.feiFeita" type="button" [ngClass]="flag ? 'btn btn-warning' : 'btn btn-danger'"
                    (click)="AlterarCard()" >{{nomeDoBotao}}</button>
     </div>
   </div>

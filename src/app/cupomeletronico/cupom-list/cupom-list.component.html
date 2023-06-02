@@ -87,7 +87,7 @@
               Enviar Pacote
             </button>
             <button type="button"  (click)="openConfirmationDialog()" [disabled]="loading" class="btn btn-danger" style="margin-left: 5px;">
-              <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
+              <span *ngIf="canceling" class="spinner-border spinner-border-sm mr-1"></span>
               Cancelar
             </button>
           </div>

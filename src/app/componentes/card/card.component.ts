@@ -1,3 +1,4 @@
+import { ElementSchemaRegistry } from '@angular/compiler';
 import { Component, Input, OnInit } from '@angular/core';
 import { CardData } from 'src/app/models/card';
 
@@ -29,17 +30,20 @@ export class CardComponent implements OnInit {
   }
 
   isValidYear(date: Date): boolean {
-    if (date instanceof Date && !isNaN(date.getTime())) {
+    if (date ) {
       const year = date.getFullYear();
       const minYear = 1900;
       const maxYear = 2100;
-      return year >= minYear && year <= maxYear;
+      return year >= minYear ;
     }
     return false;
   }
 
-  isDataValida() {
-    return this.isValidYear(this.cardData.dataConclusao);
+  HabilitaCampo() {
+     if (this.isValidYear(this.cardData.dataConclusao))
+     return true;
+     else
+     return false;
   }
 
       

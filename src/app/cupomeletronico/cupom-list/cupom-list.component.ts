@@ -22,6 +22,7 @@ export class CupomListComponent implements AfterViewInit {
   disableScanner = false;
   form!: FormGroup ;
   loading = false;
+  canceling = false;
   submitted = false;
   produto:string="";
   nomeDoOperador:string="";
@@ -115,9 +116,9 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
         maxWidth: "400px",
         data: dialogData
       });
-    
+      this.canceling = true;
       dialogRef.afterClosed().subscribe(dialogResult => {
-        this.loading = true;
+       
         this.result = dialogResult;
         if (this.result){
           this.excluirLista();
@@ -128,7 +129,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
     
     excluirLista(){
       this.cardData= [];
-      this.loading = false;
+      this.canceling = false;
     }
     
     ListarPorNumeroDoPacoteDireto(){
