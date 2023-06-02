@@ -21,11 +21,27 @@ export class CardComponent implements OnInit {
   AlterarCard(): void {
    
      this.flag=!this.flag;
-     this.cardData.concluido = this.flag;
+     this.cardData.concluido =  !this.cardData.concluido
      if (!this.flag){
        this.nomeDoBotao = "Desfazer";
      } else
        this.nomeDoBotao = "Concluído";
   }
+
+  isValidYear(date: Date): boolean {
+    if (date instanceof Date && !isNaN(date.getTime())) {
+      const year = date.getFullYear();
+      const minYear = 1900;
+      const maxYear = 2100;
+      return year >= minYear && year <= maxYear;
+    }
+    return false;
+  }
+
+  isDataValida() {
+    return this.isValidYear(this.cardData.dataConclusao);
+  }
+
+      
 
 }

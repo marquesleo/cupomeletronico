@@ -27,4 +27,9 @@ export class OperacoesService {
   getByIdPacote(id_pacote:number) {
     return this.http.get<CardData[]>(`${environment.apiUrl}/v1/Operacao/ObterPorPacote/${id_pacote}`);
   }
+  SalvarPacote(operacoes: CardData[]) {
+    const idfuncionario = this.userValue?.id;
+    operacoes.forEach(i=> i.idFuncionario = idfuncionario);
+    return this.http.post<CardData[]>(`${environment.apiUrl}/v1/Operacao`, operacoes);
+  }
 }

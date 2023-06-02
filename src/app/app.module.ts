@@ -31,9 +31,6 @@ import { ConfirmationDialogComponent } from './componentes/confirmation-dialog/c
 import { ConfirmationDialogService } from './componentes/confirmation-dialog/confirmation-dialog.service';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatDialogModule } from '@angular/material/dialog';
-import { NgxPaginationModule } from 'ngx-pagination';
-import { NgQrScannerModule } from 'angular2-qrscanner';
-import { NgxScannerQrcodeModule } from 'ngx-scanner-qrcode';
 
 
 @NgModule({
@@ -67,9 +64,7 @@ import { NgxScannerQrcodeModule } from 'ngx-scanner-qrcode';
     MatDatepickerModule,
     MatNativeDateModule, 
     MatDatepickerModule,
-    NgxPaginationModule,
-    NgQrScannerModule,
-    NgxScannerQrcodeModule,
+     
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: environment.production,
       // Register the ServiceWorker as soon as the application is stable

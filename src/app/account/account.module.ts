@@ -16,7 +16,6 @@ import {
     ScannerQRCodeResult,
     NgxScannerQrcodeComponent
   } from 'ngx-scanner-qrcode';
-import { CardComponent } from '../componentes/card/card.component';
 @NgModule({
     imports: [
         CommonModule,
@@ -29,8 +28,7 @@ import { CardComponent } from '../componentes/card/card.component';
     declarations: [
         LayoutComponent,
         LoginComponent,
-        CardComponent
-        
+              
         
     ]
 })

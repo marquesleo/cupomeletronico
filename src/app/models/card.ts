@@ -1,4 +1,5 @@
 export class CardData {
+    id:number;
     faccao: string;
     funcionario: string;
     dataConclusao: Date;
@@ -26,4 +27,7 @@ export class CardData {
     tituloCupom:string;
     sequencia:string;
     concluido:boolean =false;
+    operacaoPadraoId:number;
+    idFuncionario:number;
+    grupoPacoteId:number;
   }
