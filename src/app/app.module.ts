@@ -33,6 +33,24 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatDialogModule } from '@angular/material/dialog';
 
 
+import { HttpClient } from '@angular/common/http';
+
+export const loadEnvironmentConfig = (http: HttpClient) => {
+  return () => {
+    return http.get<any>('/assets/config/env.json').toPromise()
+      .then(config => {
+        environment.apiUrl = config.APIURL;
+      })
+      .catch(error => {
+        console.error('Erro ao carregar configuração do ambiente', error);
+        // Trate o erro adequadamente, como definir um valor padrão para a propriedade apiUrl
+      });
+  };
+};
+
+
+
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -79,6 +97,7 @@ import { MatDialogModule } from '@angular/material/dialog';
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
     { provide: APP_INITIALIZER, useFactory: appInitializer, multi: true, deps: [AccountService] },
+    { provide: APP_INITIALIZER, useFactory: loadEnvironmentConfig, multi: true, deps: [HttpClient] },
   ],
   entryComponents: [ ConfirmationDialogComponent ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA,CUSTOM_ELEMENTS_SCHEMA],

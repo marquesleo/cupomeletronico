@@ -9,6 +9,8 @@ const accountModule = () => import('./account/account.module').then(x => x.Accou
 const cupomModule = ()=> import('./cupomeletronico/cupomeletronico.module').then(x=> x.CupomEletronicoModule);
 
 
+
+
 const routes: Routes = [
     
   { path: '', component: HomeComponent, canActivate: [AuthGuard] },

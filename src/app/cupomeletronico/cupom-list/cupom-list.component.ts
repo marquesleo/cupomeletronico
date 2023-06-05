@@ -166,7 +166,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
       .pipe(first ())
       .subscribe((card:CardData[])=> { 
           this.cardData = card;
-          console.log(this.cardData);
+          //console.log(this.cardData);
           this.busy = false;
           
       },
@@ -180,6 +180,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
     
     public handle(action: NgxScannerQrcodeComponent, fn: string): void {
       action[fn]().subscribe(console.log, alert);
+      this.alertService.error(fn);
     }
     
     public onSelects(files: any): void {
