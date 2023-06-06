@@ -1,0 +1,102 @@
+<div class="card">
+  <h4 class="card-header">CUPOM ELETRÔNICO</h4>
+  <div class="card-body">
+
+<h3>Operador: {{user.nome}}</h3>
+<div *ngIf="!cardData?.length">   
+    <div class="row">
+  
+       <div class="col-xs-12 col-md-6 col-lg-4 col-xl-3 my-1">
+          <select [ngModel]="null" (ngModelChange)="action.playDevice($event)" class="form-select form-select-sm">
+           <option [value]="null" selected>Select device</option>
+           <option *ngFor="let c of action.devices.value; let i = index" [ngValue]="c.deviceId" [selected]="i == action.deviceActive">{{c.label}}</option>
+         </select>
+       </div>
+
+    </div>
+    <div class="row">
+        <div class="col-xs-12 col-md-6 col-lg-4 col-xl-3 my-1">
+         <!-- ngx-scanner-qrcode -->
+        <ngx-scanner-qrcode #action="scanner"  class="col-xs-12"  [config]="config" (event)="onEvent($event)"></ngx-scanner-qrcode>
+         <!-- data  -->  
+         <!-- <p class="data">{{ (action.data | async | json) }}</p> -->
+
+          <!-- loading -->
+          <p *ngIf="action.isLoading">⌛ Loading...</p>
+
+           <!-- start/stop -->
+           <button class="btn" [class.btn-info]="!action.isStart" [class.btn-warning]="action.isStart" [disabled]="action.isLoading" (click)="handle(action, action.isStart ? 'stop' : 'start')">
+<img [src]="action.isStart ? 'https://id1945.github.io/images/svg/camera-off.svg' : 'https://id1945.github.io/images/svg/camera-on.svg'" width="30px"/>
+           </button>
+
+          <!-- play/pause -->
+         <button class="btn" [class.btn-info]="!action.isStart" [class.btn-warning]="action.isStart" [disabled]="!action.isStart" (click)="handle(action, action.isPause ? 'play' : 'pause')">
+          <img [src]="action.isPause ? 'https://id1945.github.io/images/svg/play.svg': 'https://id1945.github.io/images/svg/pause.svg'" width="30px"/>
+         </button>
+    </div>  
+  </div>
+   <div class="row">
+       <input type="text" class="form-control" [(ngModel)]="buscaPacote" placeholder="Digite sua busca">
+       <button class="btn btn-primary" (click)="ListarPorNumeroDoPacoteDireto()">Filtrar</button>
+  </div>
+ </div>
+ 
+<br>
+<div *ngIf="busy">
+ 
+      <span class="spinner-border spinner-border-lg align-center"></span>
+     
+</div>
+
+<div>
+
+  <div class="row align-center">
+   <div class="row">
+     <div class="col-sm-6 col-md-4 col-lg-3 col-xs-3" *ngFor="let card of cardData | paginate: { itemsPerPage: pageSize, currentPage: paginaAtual }" [ngClass]="{'mb-3': !cardData.length}">
+          <app-card [cardData]="card"></app-card>
+     </div>
+     <pagination-controls (pageChange)="paginaAtual = $event" previousLabel="Anterior" nextLabel="Próximo"></pagination-controls>
+   </div>
+  </div>
+
+
+     <!--<button (click)="chamarCamera()">CHAMAR CAMERA</button>
+      <button (click)="desahabilitar()">fechar CAMERA</button>
+      <ng-container *ngIf="!disableScanner">
+      <qr-scanner
+      [debug]="false"
+      [canvasWidth]="1080" 
+      [canvasHeight]="720" 
+      [stopAfterScan]="true"
+      [updateTime]="500"> 
+      </qr-scanner>
+  </ng-container>
+
+      <ng-container *ngIf="!disableScanner">
+          <video qrScanner (scan)="onScanSuccess($event)" width="50%"></video>
+
+        
+
+      </ng-container> -->
+
+      <div class="row">
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+          <div style="display: flex; justify-content: space-between;">
+            <button [disabled]="loading" class="btn btn-primary" style="margin-right: 5px;">
+              <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
+              Enviar Pacote
+            </button>
+            <button type="button"  (click)="openConfirmationDialog()" [disabled]="loading" class="btn btn-danger" style="margin-left: 5px;">
+              <span *ngIf="canceling" class="spinner-border spinner-border-sm mr-1"></span>
+              Cancelar
+            </button>
+          </div>
+          <!--<a routerLink="../register" class="btn btn-link">Criar Conta</a>-->
+        </form>
+      </div>
+      
+
+
+     
+  </div>
+</div> 

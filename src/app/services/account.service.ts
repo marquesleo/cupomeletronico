@@ -110,14 +110,14 @@ export class AccountService {
     }
 
     login(qrCode:string) {
-      
+        var url = environment.apiUrl;
         const usuario = { 
             id:0,
             nome:"",
             qrcode:qrCode
             
         };
-        return this.http.post<User>(`${environment.apiUrl}/v1/usuario/autenticar`, usuario)
+        return this.http.post<User>(`${url}/v1/usuario/autenticar`, usuario)
             .pipe(          
                 map(user => {
                   
@@ -166,19 +166,23 @@ export class AccountService {
       }
 
      register(user: User) {
-        return this.http.post(`${environment.apiUrl}/v1/usuario`, user);
+        var url = environment.apiUrl;
+        return this.http.post(`${url}/v1/usuario`, user);
     }
 
      getAll() {
-        return this.http.get<User[]>(`${environment.apiUrl}/usuario`);
+        var url = environment.apiUrl;
+        return this.http.get<User[]>(`${url}/usuario`);
      }
 
      getById(id: number) {
-        return this.http.get<User>(`${environment.apiUrl}/usuario/ObterPorId/${id}`);
+        var url = environment.apiUrl;
+        return this.http.get<User>(`${url}/usuario/ObterPorId/${id}`);
      }
 
     update(id:number, params:any) {
-        return this.http.put(`${environment.apiUrl}/v1/usuario/${id}`, params)
+        var url = environment.apiUrl;
+        return this.http.put(`${url}/v1/usuario/${id}`, params)
             .pipe(map(x => {
                 // update stored user if the logged in user updated their own record
                 if (id == this.userValue.id) {
@@ -194,7 +198,8 @@ export class AccountService {
     }
 
     delete(id: number) {
-        return this.http.delete(`${environment.apiUrl}/v1/usuario/${id}`)
+        var url = environment.apiUrl;
+        return this.http.delete(`${url}/v1/usuario/${id}`)
             .pipe(map(x => {
                 // auto logout if the logged in user deleted their own record
                 if (id == this.userValue.id) {

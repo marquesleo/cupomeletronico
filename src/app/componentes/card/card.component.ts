@@ -1,3 +1,4 @@
+import { ElementSchemaRegistry } from '@angular/compiler';
 import { Component, Input, OnInit } from '@angular/core';
 import { CardData } from 'src/app/models/card';
 
@@ -21,11 +22,30 @@ export class CardComponent implements OnInit {
   AlterarCard(): void {
    
      this.flag=!this.flag;
-     this.cardData.concluido = this.flag;
+     this.cardData.concluido =  !this.cardData.concluido
      if (!this.flag){
        this.nomeDoBotao = "Desfazer";
      } else
        this.nomeDoBotao = "Concluído";
   }
+
+  isValidYear(date: Date): boolean {
+    if (date ) {
+      const year = date.getFullYear();
+      const minYear = 1900;
+      const maxYear = 2100;
+      return year >= minYear ;
+    }
+    return false;
+  }
+
+  HabilitaCampo() {
+     if (this.isValidYear(this.cardData.dataConclusao))
+     return true;
+     else
+     return false;
+  }
+
+      
 
 }
