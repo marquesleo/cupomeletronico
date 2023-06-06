@@ -11,6 +11,7 @@ import { MatCardModule} from '@angular/material/card';
 import { MatButtonModule} from '@angular/material/button';
 import { CardComponent } from '../componentes/card/card.component';
 import { NgxPaginationModule } from 'ngx-pagination';
+import { SafePipe } from '../account/login/safe.pipe';
 
 @NgModule({
     imports: [
@@ -28,7 +29,7 @@ import { NgxPaginationModule } from 'ngx-pagination';
     declarations: [
         CupomListComponent,
         CupomLayoutComponent,
-        CardComponent
+        CardComponent,
         
     ]
 })

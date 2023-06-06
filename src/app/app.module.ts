@@ -34,6 +34,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 
 
 import { HttpClient } from '@angular/common/http';
+import { AlertDialogComponent } from './componentes/alert-dialog/alert-dialog.component';
 
 export const loadEnvironmentConfig = (http: HttpClient) => {
   return () => {
@@ -59,7 +60,8 @@ export const loadEnvironmentConfig = (http: HttpClient) => {
     NotFoundComponent,
     InternalServerComponent,
     ConfirmationDialogComponent,
-  
+    AlertDialogComponent,
+     
     
     
   ],

@@ -3,7 +3,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AccountService } from 'src/app/services/account.service';
 import { AlertService } from 'src/app/services/alert.service';
-import { NgxScannerQrcodeComponent, NgxScannerQrcodeService, ScannerQRCodeConfig, ScannerQRCodeResult, ScannerQRCodeSelectedFiles } from 'ngx-scanner-qrcode';
+import { NgxScannerQrcodeComponent, NgxScannerQrcodeService, ScannerQRCodeConfig, ScannerQRCodeDevice, ScannerQRCodeResult, ScannerQRCodeSelectedFiles } from 'ngx-scanner-qrcode';
+import { delay } from 'rxjs';
 
 
 @Component({
@@ -69,19 +70,35 @@ get f() { return this.form.controls; }
 
 
 ngAfterViewInit(): void {
- 
+ this.action.isReady.pipe(delay(1000)).subscribe(() => {
+    this.handle(this.action, 'start');
+  });
 }
 
-public onEvent(qrcode: ScannerQRCodeResult[]): void {
+public onEvent(qrcode: ScannerQRCodeResult[], action?: any): void {
+  qrcode?.length && action && action.pause(); // Detect once and pause scan!
+  console.log(qrcode);
   if (qrcode.length > 0){
     const valor = qrcode[0].value;
     this.Gravar(valor);
   }
 }
 
-public handle(action: NgxScannerQrcodeComponent, fn: string): void {
-  action[fn]().subscribe(console.log, alert);
+
+public handle(action: any, fn: string): void {
+    const playDeviceFacingBack = (devices: ScannerQRCodeDevice[]) => {
+    // front camera or back camera check here!
+    const device = devices.find(f => (/back|rear|environment/gi.test(f.label))); // Default Back Facing Camera
+    action.playDevice(device ? device.deviceId : devices[0].deviceId);
+  }
+
+  if (fn === 'start') {
+    action[fn](playDeviceFacingBack).subscribe((r: any) => console.log(fn, r), alert);
+  } else {
+    action[fn]().subscribe((r: any) => console.log(fn, r), alert);
+  }
 }
+
 
 public onSelects(files: any): void {
   this.qrcode.loadFiles(files).subscribe((res: ScannerQRCodeSelectedFiles[]) => {
@@ -117,7 +134,7 @@ Gravar(codigoQrCode:string) {
        this.router.navigateByUrl(returnUrl);
     },
      (err)=> {
-       
+       this.alertService.clear();
       this.alertService.error(err);
       this.loading = false;
      }

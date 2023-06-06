@@ -2,7 +2,7 @@ import { AfterViewInit,Component,  ViewChild, ViewEncapsulation,HostListener } f
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AlertService } from 'src/app/services/alert.service';
-import { NgxScannerQrcodeComponent, NgxScannerQrcodeService, ScannerQRCodeConfig, ScannerQRCodeResult, ScannerQRCodeSelectedFiles } from 'ngx-scanner-qrcode';
+import { NgxScannerQrcodeComponent, NgxScannerQrcodeService, ScannerQRCodeConfig, ScannerQRCodeDevice, ScannerQRCodeResult, ScannerQRCodeSelectedFiles } from 'ngx-scanner-qrcode';
 import { AccountService } from 'src/app/services/account.service';
 import { Alert, User } from 'src/app/models';
 import { CardData } from 'src/app/models/card';
@@ -10,6 +10,10 @@ import { OperacoesService } from 'src/app/services/operacoes.service';
 import { first } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent, ConfirmDialogModel } from 'src/app/componentes/confirmation-dialog/confirmation-dialog.component';
+import { delay } from 'rxjs';
+import { AlertComponent } from 'src/app/componentes/alert/alert.component';
+import { AlertDialogComponent } from 'src/app/componentes/alert-dialog/alert-dialog.component';
+
 
 @Component({
   selector: 'app-cupom-list',
@@ -18,6 +22,7 @@ import { ConfirmationDialogComponent, ConfirmDialogModel } from 'src/app/compone
 })
 export class CupomListComponent implements AfterViewInit {
   user: User;
+  cardData:CardData[]=[];
   buscaPacote:string;
   disableScanner = false;
   form!: FormGroup ;
@@ -46,10 +51,6 @@ export class CupomListComponent implements AfterViewInit {
     }
   } 
 };
-
-
-cardData: CardData[] = [];
-  
 
 public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
 
@@ -83,7 +84,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
 
       this.user = this.operacaoService.userValue;
       this.nomeDoOperador = this.user.nome; 
-      this.Listar(this.user.id);
+   
       this.form = this.formBuilder.group({
         pacote: [, Validators.required],
        
@@ -96,16 +97,54 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
     
     
     ngAfterViewInit(): void {
-     
-    }
+      
+      this.Listar(this.user.id);
     
-    public onEvent(qrcode: ScannerQRCodeResult[]): void {
+    }
+
+    public onEvent(qrcode: ScannerQRCodeResult[], action?: any): void {
+      qrcode?.length && action && action.pause(); // Detect once and pause scan!
+      console.log(qrcode);
       if (qrcode.length > 0){
         const valor = Number(qrcode[0].value);
         this.ListarPorNumeroDoPacote(valor);
         
       }
     }
+    
+    
+    public handle(action: any, fn: string): void {
+      
+
+      const playDeviceFacingBack = (devices: ScannerQRCodeDevice[]) => {
+        // front camera or back camera check here!
+        const device = devices.find(f => (/back|rear|environment/gi.test(f.label))); // Default Back Facing Camera
+        action.playDevice(device ? device.deviceId : devices[0].deviceId);
+      }
+    
+      if (fn === 'start') {
+        action[fn](playDeviceFacingBack).subscribe((r: any) => console.log(fn, r), alert);
+      } else {
+        action[fn]().subscribe((r: any) => console.log(fn, r), alert);
+      }
+    }
+    
+    
+    public onSelects(files: any): void {
+      this.qrcode.loadFiles(files).subscribe((res: ScannerQRCodeSelectedFiles[]) => {
+        this.qrCodeResult = res;
+      });
+    }
+
+    Confirmacao() {
+      this.dialog.open(AlertDialogComponent, {
+        data: {
+          icon: 'Check',
+          message: 'Pacote Enviado com sucesso'
+        }
+      });
+    }
+
     result: string = '';
     openConfirmationDialog() {
       const message = `Deseja Cancelar Pacotes?`;
@@ -148,13 +187,15 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
       this.operacaoService.getByIdPacote(numeroDoPacote)
       .pipe(first ())
       .subscribe((card:CardData[])=> { 
+          this.alertService.clear();
           this.cardData = card;
           this.busy = false;
           
       },
       (err)=> {
         this.busy = false;
-        this.alertService.error(err);
+        this.alertService.clear();
+        this.alertService.error(err,);
       }
       );
     }
@@ -166,7 +207,11 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
       .pipe(first ())
       .subscribe((card:CardData[])=> { 
           this.cardData = card;
-          //console.log(this.cardData);
+          if (this.cardData?.length == 0){
+            this.action.isReady.pipe(delay(1000)).subscribe(() => {
+              this.handle(this.action, 'start');
+            });
+          }
           this.busy = false;
           
       },
@@ -178,16 +223,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
       );
     }
     
-    public handle(action: NgxScannerQrcodeComponent, fn: string): void {
-      action[fn]().subscribe(console.log, alert);
-      this.alertService.error(fn);
-    }
-    
-    public onSelects(files: any): void {
-      this.qrcode.loadFiles(files).subscribe((res: ScannerQRCodeSelectedFiles[]) => {
-        this.qrCodeResult = res;
-      });
-    }
+   
      onSubmit() {
       this.submitted = true;
       this.loading = true;
@@ -201,8 +237,8 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
       .pipe(first())
       .subscribe({
           next: () => {
-              this.alertService.success('Pacote Enviado com sucesso', { keepAfterRouteChange: true });
-              this.router.navigate(['/cupomeletronico']);
+            this.Confirmacao();
+              this.Listar(this.user.id);
           },
           error: error => {
               this.alertService.error(error);
