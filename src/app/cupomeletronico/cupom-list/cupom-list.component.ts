@@ -259,7 +259,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
       this.alertService.clear();
       if (this.cardData.length == 0){
         this.Aviso("Nenhum Pacote foi selecionado");
-        // this.alertService.error("Nenhum Pacote foi selecionado");
+        this.loading = false;
           return;
       }
       console.log('loading' +  this.loading);
@@ -279,7 +279,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
           },
           error: error => {
               this.loading = false;
-           //   this.Aviso(error);
+               this.Aviso(error);
               this.alertService.error(error);
             
            
