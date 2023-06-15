@@ -32,6 +32,8 @@ export class CupomListComponent implements AfterViewInit {
   produto:string="";
   nomeDoOperador:string="";
   pageSize = 10;
+  pacote:string='';
+  filtrouPorUsuario = false;
   public paginaAtual = 1;
   public busy: boolean = false;
 
@@ -70,7 +72,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
     }
 
     onScanSuccess(qrCode: Event) {
-      console.log(qrCode.target);
+    
       this.disableScanner = true; // desabilita o scanner após a leitura do QR code
     }
     
@@ -78,7 +80,8 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
     ngOnInit() {
     
       if (!this.user.utilizaCupom){
-        this.alertService.warn("Usuário não habilitado para cupom eletrônico!");
+        this.Aviso("Usuário não habilitado para cupom eletrônico!");
+    
         this.router.navigate(['/cupomeletronico']);
       }else{
 
@@ -102,12 +105,13 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
     
     }
 
+    
     public onEvent(qrcode: ScannerQRCodeResult[], action?: any): void {
       qrcode?.length && action && action.pause(); // Detect once and pause scan!
-      console.log(qrcode);
+      this.pacote = '';
       if (qrcode.length > 0){
-        const valor = Number(qrcode[0].value);
-        this.ListarPorNumeroDoPacote(valor);
+        this.pacote = qrcode[0].value;
+        this.ListarPorNumeroDoPacote(this.pacote);
         
       }
     }
@@ -143,6 +147,16 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
           message: 'Pacote Enviado com sucesso'
         }
       });
+    
+    }
+
+    Aviso(msg:string) {
+      this.dialog.open(AlertDialogComponent, {
+        data: {
+          icon: 'Check',
+          message: msg
+        }
+      });
     }
 
     result: string = '';
@@ -161,8 +175,11 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
         this.result = dialogResult;
         if (this.result){
           this.excluirLista();
+
         }
+     
       });
+      this.canceling = false;
     }
     
     
@@ -173,21 +190,25 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
     
     ListarPorNumeroDoPacoteDireto(){
     
-      if (this.buscaPacote)
-        this.ListarPorNumeroDoPacote(this.buscaPacote);  
+      if (this.pacote)
+        this.ListarPorNumeroDoPacote(this.pacote);  
       else
-        this.alertService.error("Preencha o número do pacote!");  
+        this.Aviso("Preencha o número do pacote!");
+        //this.alertService.error();  
     }
     
     
     
     ListarPorNumeroDoPacote(numeroDoPacote:any){
       this.busy = true;
-     
+      this.filtrouPorUsuario = false;
+      this.cardData = [];
       this.operacaoService.getByIdPacote(numeroDoPacote)
       .pipe(first ())
       .subscribe((card:CardData[])=> { 
           this.alertService.clear();
+
+        
           this.cardData = card;
           this.busy = false;
           
@@ -202,15 +223,20 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
     
     Listar(valor :number):void {
       this.busy = true;
-     
+      this.filtrouPorUsuario = false;
+      this.pacote = '';
+      this.cardData =[];
       this.operacaoService.getAll(valor)
       .pipe(first ())
       .subscribe((card:CardData[])=> { 
           this.cardData = card;
+          
           if (this.cardData?.length == 0){
             this.action.isReady.pipe(delay(1000)).subscribe(() => {
               this.handle(this.action, 'start');
             });
+          }else{
+            this.filtrouPorUsuario = true;
           }
           this.busy = false;
           
@@ -225,31 +251,45 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
     
    
      onSubmit() {
-      this.submitted = true;
+     
       this.loading = true;
       // reset alerts on submit
+
+
       this.alertService.clear();
       if (this.cardData.length == 0){
-          this.alertService.error("Nenhum Pacote foi selecionado");
+        this.Aviso("Nenhum Pacote foi selecionado");
+        // this.alertService.error("Nenhum Pacote foi selecionado");
           return;
       }
+      console.log('loading' +  this.loading);
+
       this.operacaoService.SalvarPacote(this.cardData)
       .pipe(first())
       .subscribe({
           next: () => {
             this.Confirmacao();
-              this.Listar(this.user.id);
+          
+          
+            if (this.filtrouPorUsuario) {
+                  this.Listar(this.user.id);
+            }else {
+                  this.ListarPorNumeroDoPacote(this.pacote);
+            }
           },
           error: error => {
-              this.alertService.error(error);
               this.loading = false;
+           //   this.Aviso(error);
+              this.alertService.error(error);
+            
+           
           },
           complete: ()=> {
-            this.loading = false;
+          
             
           }
       });
-    
+   
      }
 
 }

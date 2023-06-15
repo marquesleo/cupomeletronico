@@ -16,8 +16,8 @@ export class CardComponent implements OnInit {
   }
   botaopadrao:string="btn btn-warning";
   botaoalterado:string="btn btn-danger";
-  cardpadrao:string="card text-white bg-primary mb-3";
-  cardalterado:string="card bg-warning mb-3";
+  cardpadrao:string="card text-white bg-primary ";
+  cardalterado:string="card bg-warning";
   flag:boolean = true;
   AlterarCard(): void {
    

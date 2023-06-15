@@ -36,10 +36,9 @@
     </div>  
   </div>
    <div class="row">
-       <input type="text" class="form-control" [(ngModel)]="buscaPacote" placeholder="Digite sua busca">
+       <input type="text" class="form-control" [(ngModel)]="pacote" placeholder="Digite sua busca">
        <button class="btn btn-primary" (click)="ListarPorNumeroDoPacoteDireto()">Filtrar</button>
-  </div>
- </div>
+  </div> </div>
  
 <br>
 <div *ngIf="busy">
@@ -50,15 +49,18 @@
 
 <div>
 
-  <div class="row align-center">
+  <div class="row">
    <div class="row">
-     <div class="col-sm-6 col-md-4 col-lg-3 col-xs-3" *ngFor="let card of cardData | paginate: { itemsPerPage: pageSize, currentPage: paginaAtual }" [ngClass]="{'mb-3': !cardData.length}">
+     <div class="col-sm-12 col-md-6 col-xs-12 col-lg-6" *ngFor="let card of cardData | paginate: { itemsPerPage: pageSize, currentPage: paginaAtual }" [ngClass]="{'mb-3': !cardData.length}">
           <app-card [cardData]="card"></app-card>
      </div>
-     <pagination-controls (pageChange)="paginaAtual = $event" previousLabel="Anterior" nextLabel="Próximo"></pagination-controls>
+    
    </div>
+  
   </div>
-
+  <div class="row">
+    <pagination-controls (pageChange)="paginaAtual = $event" previousLabel="Anterior" nextLabel="Próximo"></pagination-controls>
+   </div>
 
      <!--<button (click)="chamarCamera()">CHAMAR CAMERA</button>
       <button (click)="desahabilitar()">fechar CAMERA</button>
@@ -86,7 +88,7 @@
               <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
               Enviar Pacote
             </button>
-            <button type="button"  (click)="openConfirmationDialog()" [disabled]="loading" class="btn btn-danger" style="margin-left: 5px;">
+            <button type="button"  (click)="openConfirmationDialog()" [disabled]="canceling" class="btn btn-danger" style="margin-left: 5px;">
               <span *ngIf="canceling" class="spinner-border spinner-border-sm mr-1"></span>
               Cancelar
             </button>

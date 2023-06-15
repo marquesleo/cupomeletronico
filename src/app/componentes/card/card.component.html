@@ -1,18 +1,19 @@
-<div class="card" style="width: 100%;">
+<div class="card card-spacing" style="width: 300px; height: 200px;">
 
-<div [ngClass]="flag ? 'card text-white bg-primary mb-3' : 'card bg-warning mb-3'"
-style="height: 100%;">
+
+ 
+<div [ngClass]="flag ? 'card text-white bg-primary ' : 'card bg-warning '">
    
     <div class="card-body">
       <h4 class="card-title">Ref:{{cardData.pacoteReferencia}}-{{cardData.produtoDescricao}}</h4>
+      {{cardData.operacaoPadraoReferencia}}<br>
      Tit:{{cardData.tituloCupom}}<br>
-     Seq:{{cardData.sequencia}}<br>
-     Qtd:{{ cardData.quantidade }}<br>
-     Tempo:{{ cardData.tempoTotal }}<br>
-   
-      <button [disabled]="cardData.feiFeita" type="button" [ngClass]="flag ? 'btn btn-warning' : 'btn btn-danger'"
+     Seq:{{cardData.sequencia}} Qtd:{{ cardData.quantidade }} Tempo:{{ cardData.tempoTotal }}<br>
+    
+      <button [disabled]="cardData.foiFeita" type="button" [ngClass]="flag ? 'btn btn-warning' : 'btn btn-danger'"
                    (click)="AlterarCard()" >{{nomeDoBotao}}</button>
     </div>
-  </div>
-    <!-- Conteúdo do card -->
+
+</div>
+
 </div>
