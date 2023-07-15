@@ -285,7 +285,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
            
           },
           complete: ()=> {
-          
+            this.loading = false;
             
           }
       });
