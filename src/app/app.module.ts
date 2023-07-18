@@ -31,10 +31,11 @@ import { ConfirmationDialogComponent } from './componentes/confirmation-dialog/c
 import { ConfirmationDialogService } from './componentes/confirmation-dialog/confirmation-dialog.service';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatDialogModule } from '@angular/material/dialog';
-
+import { Ng2SearchPipeModule } from 'ng2-search-filter';
 
 import { HttpClient } from '@angular/common/http';
 import { AlertDialogComponent } from './componentes/alert-dialog/alert-dialog.component';
+
 
 export const loadEnvironmentConfig = (http: HttpClient) => {
   return () => {
@@ -62,8 +63,6 @@ export const loadEnvironmentConfig = (http: HttpClient) => {
     ConfirmationDialogComponent,
     AlertDialogComponent,
      
-    
-    
   ],
   imports: [
     BrowserModule,
@@ -84,14 +83,15 @@ export const loadEnvironmentConfig = (http: HttpClient) => {
     MatDatepickerModule,
     MatNativeDateModule, 
     MatDatepickerModule,
-     
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: environment.production,
       // Register the ServiceWorker as soon as the application is stable
       // or after 30 seconds (whichever comes first).
       registrationStrategy: 'registerWhenStable:30000'
     }),
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+    Ng2SearchPipeModule,
+
   ],
   providers: [
     ConfirmationDialogService,

@@ -27,8 +27,12 @@ export class CardData {
     tituloCupom:string;
     sequencia:string;
     concluido:boolean =false;
+    nomeDoBotao:string = "Concluído";
     operacaoPadraoId:number;
     idFuncionario:number;
     grupoPacoteId:number;
     foiFeita:boolean;
+    flag:boolean=true;
+    strTituloCupom:string='';
+
   }

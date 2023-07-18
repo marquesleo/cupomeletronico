@@ -23,12 +23,17 @@ export class OperacoesService {
 
   getAll(id_usuario:number) {
     var url = environment.apiUrl;
-    return this.http.get<CardData[]>(`${url}/v1/Operacao/${id_usuario}`);
+    return this.http.get<CardData[]>(`${url}/v1/Operacao/ObterPorFuncionario/${id_usuario}`);
   }
   getByIdPacote(id_pacote:number) {
     var url = environment.apiUrl;
     return this.http.get<CardData[]>(`${url}/v1/Operacao/ObterPorPacote/${id_pacote}`);
   }
+  getTempoDeProducao(idUsuario:number){
+    var url = environment.apiUrl;
+    return this.http.get<number>(`${url}/v1/Operacao/ObterTempoDeProducao/${idUsuario}`);
+  }
+
   SalvarPacote(operacoes: CardData[]) {
     var url = environment.apiUrl;
     const idfuncionario = this.userValue?.id;

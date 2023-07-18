@@ -2,16 +2,16 @@
 
 
  
-<div [ngClass]="flag ? 'card text-white bg-primary ' : 'card bg-warning '">
+<div [ngClass]="cardData.flag ? 'card text-white bg-info ' : 'card bg-warning '">
    
     <div class="card-body">
-      <h5 class="card-title">Ref:{{cardData.pacoteReferencia}}-{{cardData.produtoDescricao}}</h5>
-     <h5>{{cardData.operacaoPadraoReferencia}}<br>
-     Tit:{{cardData.tituloCupom}}<br>
-     Seq:{{cardData.sequencia}} Qtd:{{ cardData.quantidade }} Tempo:{{ cardData.tempoTotal }}<br>
-     </h5>
-      <button [disabled]="cardData.foiFeita" type="button" [ngClass]="flag ? 'btn btn-warning' : 'btn btn-danger'"
-                   (click)="AlterarCard()" >{{nomeDoBotao}}</button>
+      <h5 class="card-title">Ref:{{cardData.produtoReferencia}}-{{cardData.produtoDescricao}}</h5>
+      <h5 class="colored-text">{{cardData.operacaoPadraoReferencia}}<br>
+      Tit:{{cardData.strTituloCupom}}<br>
+      Seq:{{cardData.sequencia}} Qtd:{{ cardData.quantidade }} Tempo:{{ cardData.tempoTotal }}<br></h5>
+   
+      <button [disabled]="cardData.foiFeita" type="button" [ngClass]="cardData.flag ? 'btn btn-warning' : 'btn btn-danger'"
+                   (click)="AlterarCard()" >{{this.cardData.nomeDoBotao}}</button>
     </div>
 
 </div>

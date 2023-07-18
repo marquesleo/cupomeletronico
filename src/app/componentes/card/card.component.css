@@ -2,3 +2,8 @@
     margin-bottom: 20px;
    
 }
+
+.colored-text {
+    color: black; /* Substitua "blue" pela cor que deseja usar */
+    font-weight: bold;
+}

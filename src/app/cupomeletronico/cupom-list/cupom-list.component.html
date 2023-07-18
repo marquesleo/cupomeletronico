@@ -2,7 +2,15 @@
   <h4 class="card-header">CUPOM ELETRÔNICO</h4>
   <div class="card-body">
 
-<h3>Operador: {{user.nome}}</h3>
+<h3>Operador: {{user.nome}} --- TEMPO DO DIA: {{tempoProducao}}</h3>
+<div *ngIf="!cardData?.length">
+  <div class="checkbox">
+    <input [(ngModel)]="emlote" id="emlote" type="checkbox" class="form-check-input" >
+    <label for="emlote"  class="form-check-label" >
+        Lançamento em Lote ?
+    </label>
+  </div>
+</div>
 <div *ngIf="!cardData?.length">   
     <div class="row">
   
@@ -49,18 +57,30 @@
 
 <div>
 
+  <div *ngIf="cardData?.length">
   <div class="row">
-   <div class="row">
-     <div class="col-xs-12" *ngFor="let card of cardData | paginate: { itemsPerPage: pageSize, currentPage: paginaAtual }" [ngClass]="{'mb-2': !cardData.length}">
-          <app-card [cardData]="card"></app-card>
-     </div>
-    
-   </div>
-  
+    <div class="container search-table">
+      <div class="search-box">
+          <div class="row">
+              
+              <div class="col-sm-12">
+                  <input type="text" class="form-control" placeholder="Filtrar referência da operação..." [(ngModel)]="searchText" />      
+              </div>
+          </div>
+      </div>
+    </div>
   </div>
   <div class="row">
-    <pagination-controls (pageChange)="paginaAtual = $event" previousLabel="Anterior" nextLabel="Próximo"></pagination-controls>
+     <div class="col-xs-12" *ngFor="let card of cardData |  paginate: { itemsPerPage: pageSize, currentPage: paginaAtual } | filter: searchText" [ngClass]="{'mb-2': !cardData.length}">
+          <app-card [cardData]="card" (tempo)="receberValor($event)" ></app-card>
+     </div>
    </div>
+   
+  </div>
+  <div class="row">
+    <pagination-controls (pageChange)="onPageChange($event)" previousLabel="Anterior" nextLabel="Próximo"></pagination-controls>
+   </div>
+ 
 
      <!--<button (click)="chamarCamera()">CHAMAR CAMERA</button>
       <button (click)="desahabilitar()">fechar CAMERA</button>

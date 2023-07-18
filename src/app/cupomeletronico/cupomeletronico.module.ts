@@ -11,8 +11,8 @@ import { MatCardModule} from '@angular/material/card';
 import { MatButtonModule} from '@angular/material/button';
 import { CardComponent } from '../componentes/card/card.component';
 import { NgxPaginationModule } from 'ngx-pagination';
-import { SafePipe } from '../account/login/safe.pipe';
-
+import { FilterPipe } from '../pipes/filter.pipe';
+import { filter } from 'rxjs';
 @NgModule({
     imports: [
         CommonModule,
@@ -30,6 +30,7 @@ import { SafePipe } from '../account/login/safe.pipe';
         CupomListComponent,
         CupomLayoutComponent,
         CardComponent,
+        FilterPipe
         
     ]
 })

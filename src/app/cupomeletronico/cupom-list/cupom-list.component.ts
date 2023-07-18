@@ -4,7 +4,6 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AlertService } from 'src/app/services/alert.service';
 import { NgxScannerQrcodeComponent, NgxScannerQrcodeService, ScannerQRCodeConfig, ScannerQRCodeDevice, ScannerQRCodeResult, ScannerQRCodeSelectedFiles } from 'ngx-scanner-qrcode';
 import { AccountService } from 'src/app/services/account.service';
-import { Alert, User } from 'src/app/models';
 import { CardData } from 'src/app/models/card';
 import { OperacoesService } from 'src/app/services/operacoes.service';
 import { first } from 'rxjs';
@@ -13,6 +12,9 @@ import { ConfirmationDialogComponent, ConfirmDialogModel } from 'src/app/compone
 import { delay } from 'rxjs';
 import { AlertComponent } from 'src/app/componentes/alert/alert.component';
 import { AlertDialogComponent } from 'src/app/componentes/alert-dialog/alert-dialog.component';
+import { FormControl } from '@angular/forms';
+import { OnInit } from '@angular/core';
+import { User } from 'src/app/models';
 
 
 @Component({
@@ -27,6 +29,7 @@ export class CupomListComponent implements AfterViewInit {
   disableScanner = false;
   form!: FormGroup ;
   loading = false;
+  tempoProducao:number=0;
   canceling = false;
   submitted = false;
   produto:string="";
@@ -34,6 +37,8 @@ export class CupomListComponent implements AfterViewInit {
   pageSize = 10;
   pacote:string='';
   filtrouPorUsuario = false;
+  searchText:string='';
+  emlote:boolean = false;
   public paginaAtual = 1;
   public busy: boolean = false;
 
@@ -79,6 +84,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
     
     ngOnInit() {
     
+     //this.RetornarTempo(this.user.id,0);
       if (!this.user.utilizaCupom){
         this.Aviso("Usuário não habilitado para cupom eletrônico!");
     
@@ -92,7 +98,9 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
         pacote: [, Validators.required],
        
       });
+      
     }
+   
     }
     
     // convenience getter for easy access to form fields
@@ -102,16 +110,39 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
     ngAfterViewInit(): void {
       
       this.Listar(this.user.id);
+     
     
     }
-
+    private lstEmlote:string[] = [];
     
     public onEvent(qrcode: ScannerQRCodeResult[], action?: any): void {
       qrcode?.length && action && action.pause(); // Detect once and pause scan!
-      this.pacote = '';
+      if (!this.emlote)
+          this.pacote = '';
+
       if (qrcode.length > 0){
-        this.pacote = qrcode[0].value;
-        this.ListarPorNumeroDoPacote(this.pacote);
+         if (this.emlote)
+         {
+            if (this.pacote.length > 0){
+
+              if (!this.lstEmlote.includes(qrcode[0].value)) {
+                this.lstEmlote.push(qrcode[0].value);
+                this.pacote = qrcode[0].value + ',' + this.pacote ;
+              }
+              
+              
+            }
+            else{
+                this.pacote = qrcode[0].value;
+                this.lstEmlote.push(qrcode[0].value);
+            }
+         }else 
+         {
+          
+          this.lstEmlote.push(qrcode[0].value);
+          this.ListarPorNumeroDoPacote(qrcode[0].value);
+         }
+          
         
       }
     }
@@ -197,28 +228,66 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
         //this.alertService.error();  
     }
     
-    
+    onPageChange(pageNumber: number) {
+      this.paginaAtual = pageNumber;
+      console.log(this.cardData);
+    }
+
+    getCurrentPageData() {
+      // Aqui você deve retornar os dados da página atual com base no pageSize e paginaAtual.
+      // Pode ser feito com a função slice, por exemplo:
+      const startIndex = (this.paginaAtual - 1) * this.pageSize;
+      const endIndex = startIndex + this.pageSize;
+      return this.cardData.slice(startIndex, endIndex);
+    }
     
     ListarPorNumeroDoPacote(numeroDoPacote:any){
       this.busy = true;
       this.filtrouPorUsuario = false;
       this.cardData = [];
-      this.operacaoService.getByIdPacote(numeroDoPacote)
-      .pipe(first ())
-      .subscribe((card:CardData[])=> { 
-          this.alertService.clear();
+      
+      var arrayNumero:any[] = this.pacote.split(',')
+      .map(numero => numero.trim())
+      .filter((numero, index, self) => self.indexOf(numero) === index);
 
-        
-          this.cardData = card;
-          this.busy = false;
-          
-      },
-      (err)=> {
-        this.busy = false;
-        this.alertService.clear();
-        this.alertService.error(err,);
-      }
+
+      if (this.emlote)
+      {
+      for (let index = 0; index < arrayNumero.length; index++) {
+        const element = arrayNumero[index];
+         this.operacaoService.getByIdPacote(element)
+            .pipe(first ())
+            .subscribe((card:CardData[])=> { 
+              this.alertService.clear();
+               this.cardData.push(...card);
+               console.log(this.cardData);
+               this.busy = false;
+            },
+          (err)=> {
+            this.busy = false;
+            this.alertService.clear();
+            this.alertService.error(err,);
+         }
       );
+     }
+    }
+     else 
+    {
+      this.operacaoService.getByIdPacote(numeroDoPacote)
+            .pipe(first ())
+            .subscribe((card:CardData[])=> { 
+              this.alertService.clear();
+               this.cardData.push(...card);
+               this.busy = false;
+            },
+          (err)=> {
+            this.busy = false;
+            this.alertService.clear();
+            this.alertService.error(err,);
+         }
+        );
+    }
+     this.lstEmlote = [];
     }
     
     Listar(valor :number):void {
@@ -230,9 +299,10 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
       .pipe(first ())
       .subscribe((card:CardData[])=> { 
           this.cardData = card;
-          
+          this.RetornarTempo(this.user?.id,0);
+
           if (this.cardData?.length == 0){
-            this.action.isReady.pipe(delay(1000)).subscribe(() => {
+             this.action.isReady.pipe(delay(1000)).subscribe(() => {
               this.handle(this.action, 'start');
             });
           }else{
@@ -248,7 +318,39 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
       
       );
     }
+
+    RetornarTempo(valor :number,somaDosSelecionados:number): void {
+      this.busy = true;
     
+      this.operacaoService.getTempoDeProducao(valor)
+      .pipe(first ())
+      .subscribe((tempo:number) => { 
+          this.tempoProducao = tempo;
+          if (!this.tempoProducao)
+              this.tempoProducao = 0;
+          this.tempoProducao += somaDosSelecionados;
+          this.busy = false;
+          
+      },
+      (err)=> {
+        this.busy = false;
+        this.alertService.error(err);
+      },
+      
+      );
+    }
+    
+    receberValor(valorRecebido:number) {
+      var somaElementos:number = 0; // Zera o valor para evitar que a soma acumule em chamadas repetidas.
+
+      for (let elemento of this.cardData) {
+        if (!elemento.flag)
+            somaElementos += elemento.tempoTotal;
+      }
+      this.RetornarTempo(this.user?.id,somaElementos);
+     
+    }
+
    
      onSubmit() {
      

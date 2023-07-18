@@ -1,5 +1,21 @@
+<nav class="navbar navbar-expand navbar-dark bg-primary" *ngIf="user">
+  <div class="navbar-nav">
+      <a class="nav-item nav-link" routerLink="/home" routerLinkActive="active" 
+                                                  [routerLinkActiveOptions]="{exact: true}">Home</a>
+                                                  
+      <a class="nav-item nav-link" routerLink="/cupomeletronico" routerLinkActive="active"
+                                   [routerLinkActiveOptions]="{exact: true}">Cupom Eletrônico</a>
 
-<mat-toolbar color="primary">
+      
+      <div *ngIf="isLogado()">
+        <a class="nav-item nav-link" (click)="logout()">Logout</a>
+      </div>
+  </div>
+</nav>
+
+
+
+<!--<mat-toolbar color="primary">
   <span class="fill-remaining-space">
     <button mat-icon-button [matMenuTriggerFor]="menu" 
                             #menuTrigger="matMenuTrigger" 
@@ -22,10 +38,10 @@
         </mat-icon>
         <span><a  routerLink="/cupomeletronico" routerLinkActive="active">Cupom Eletrônico</a></span>
       </button>
-     <!--<button mat-menu-item>
+     <button mat-menu-item>
         <mat-icon>videocam</mat-icon>
         <span>Let's talk</span>
-      </button>-->
+      </button>
       <div *ngIf="isLogado()">
          <button mat-menu-item>
             <mat-icon>exit_to_app</mat-icon>
@@ -36,7 +52,7 @@
   </mat-menu>
   </span>
   <span class="fill-remaining-space">Cupom Eletrônico</span>
-</mat-toolbar>
+</mat-toolbar>-->
 <!--<nav class="navbar navbar-expand navbar-dark bg-dark" *ngIf="user">
   <div class="navbar-nav">
       <a class="nav-item nav-link" routerLink="/" routerLinkActive="active" 
