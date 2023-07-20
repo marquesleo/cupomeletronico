@@ -215,6 +215,8 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
     
     
     excluirLista(){
+      this.searchText = '';
+      this.pacote = '';
       this.cardData= [];
       this.canceling = false;
     }
@@ -246,21 +248,18 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
       this.filtrouPorUsuario = false;
       this.cardData = [];
       
-      var arrayNumero:any[] = this.pacote.split(',')
-      .map(numero => numero.trim())
-      .filter((numero, index, self) => self.indexOf(numero) === index);
+     
 
 
       if (this.emlote)
       {
-      for (let index = 0; index < arrayNumero.length; index++) {
-        const element = arrayNumero[index];
-         this.operacaoService.getByIdPacote(element)
+    
+         this.operacaoService.getByIdPacotes(this.pacote)
             .pipe(first ())
             .subscribe((card:CardData[])=> { 
               this.alertService.clear();
-               this.cardData.push(...card);
-               console.log(this.cardData);
+               this.cardData = card;
+              
                this.busy = false;
             },
           (err)=> {
@@ -270,7 +269,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
          }
       );
      }
-    }
+    
      else 
     {
       this.operacaoService.getByIdPacote(numeroDoPacote)

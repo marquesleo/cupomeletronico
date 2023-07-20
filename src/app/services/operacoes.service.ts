@@ -29,6 +29,11 @@ export class OperacoesService {
     var url = environment.apiUrl;
     return this.http.get<CardData[]>(`${url}/v1/Operacao/ObterPorPacote/${id_pacote}`);
   }
+
+  getByIdPacotes(id_pacote:string) {
+    var url = environment.apiUrl;
+    return this.http.get<CardData[]>(`${url}/v1/Operacao/ObterOperacoesPorPacote/${id_pacote}`);
+  }
   getTempoDeProducao(idUsuario:number){
     var url = environment.apiUrl;
     return this.http.get<number>(`${url}/v1/Operacao/ObterTempoDeProducao/${idUsuario}`);

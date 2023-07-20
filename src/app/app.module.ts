@@ -29,9 +29,7 @@ import { InternalServerComponent } from './componentes/error-pages/internal-serv
 import { CorsInterceptor } from './helpers/CorsInterceptor';
 import { ConfirmationDialogComponent } from './componentes/confirmation-dialog/confirmation-dialog.component';
 import { ConfirmationDialogService } from './componentes/confirmation-dialog/confirmation-dialog.service';
-import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatDialogModule } from '@angular/material/dialog';
-import { Ng2SearchPipeModule } from 'ng2-search-filter';
 
 import { HttpClient } from '@angular/common/http';
 import { AlertDialogComponent } from './componentes/alert-dialog/alert-dialog.component';
@@ -90,7 +88,7 @@ export const loadEnvironmentConfig = (http: HttpClient) => {
       registrationStrategy: 'registerWhenStable:30000'
     }),
     BrowserAnimationsModule,
-    Ng2SearchPipeModule,
+    
 
   ],
   providers: [
