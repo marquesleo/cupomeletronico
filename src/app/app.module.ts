@@ -11,7 +11,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule} from '@angular/material/toolbar';
-import { MatCardModule} from '@angular/material/card';
 import { MatButtonModule} from '@angular/material/button';
 import { MatInputModule} from '@angular/material/input';
 import { MatIconModule} from '@angular/material/icon';
@@ -70,7 +69,6 @@ export const loadEnvironmentConfig = (http: HttpClient) => {
     FormsModule,
     CommonModule,
     MatToolbarModule,
-    MatCardModule,
     MatButtonModule, 
     MatIconModule, 
     MatRadioModule,
@@ -81,6 +79,7 @@ export const loadEnvironmentConfig = (http: HttpClient) => {
     MatDatepickerModule,
     MatNativeDateModule, 
     MatDatepickerModule,
+    
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: environment.production,
       // Register the ServiceWorker as soon as the application is stable

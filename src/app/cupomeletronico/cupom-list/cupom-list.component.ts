@@ -1,4 +1,4 @@
-import { AfterViewInit,Component,  ViewChild, ViewEncapsulation,HostListener } from '@angular/core';
+import { AfterViewInit,Component,  ViewChild, ViewEncapsulation,HostListener, ChangeDetectorRef } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AlertService } from 'src/app/services/alert.service';
@@ -6,7 +6,7 @@ import { NgxScannerQrcodeComponent, NgxScannerQrcodeService, ScannerQRCodeConfig
 import { AccountService } from 'src/app/services/account.service';
 import { CardData } from 'src/app/models/card';
 import { OperacoesService } from 'src/app/services/operacoes.service';
-import { first } from 'rxjs';
+import { first, isEmpty, Observable, toArray } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent, ConfirmDialogModel } from 'src/app/componentes/confirmation-dialog/confirmation-dialog.component';
 import { delay } from 'rxjs';
@@ -15,8 +15,8 @@ import { AlertDialogComponent } from 'src/app/componentes/alert-dialog/alert-dia
 import { FormControl } from '@angular/forms';
 import { OnInit } from '@angular/core';
 import { User } from 'src/app/models';
-
-
+import { MatPaginator } from '@angular/material/paginator';
+import { MatTableDataSource } from '@angular/material/table';
 @Component({
   selector: 'app-cupom-list',
   templateUrl: './cupom-list.component.html',
@@ -24,7 +24,17 @@ import { User } from 'src/app/models';
 })
 export class CupomListComponent implements AfterViewInit {
   user: User;
-  cardData:CardData[]=[];
+  initialCardData: CardData[] = []; // Preencha com os dados iniciais, se necessário
+  cardData: Observable<any>;
+
+  inicializarLista(){
+    this.initialCardData = [];
+    this.cardData = new Observable(observer => {
+      observer.next(this.initialCardData);
+      observer.complete();
+    });
+  }
+
   buscaPacote:string;
   disableScanner = false;
   form!: FormGroup ;
@@ -41,7 +51,7 @@ export class CupomListComponent implements AfterViewInit {
   emlote:boolean = false;
   public paginaAtual = 1;
   public busy: boolean = false;
-
+  @ViewChild(MatPaginator, { static: false }) paginator: MatPaginator;
  //  MediaDeviceInfo : MediaDeviceInfo = null!;
  // @ViewChild(QrScannerComponent) qrScannerComponent: QrScannerComponent ;
 
@@ -58,6 +68,8 @@ export class CupomListComponent implements AfterViewInit {
     }
   } 
 };
+dataSource: MatTableDataSource<CardData> = new MatTableDataSource<CardData>(this.initialCardData);
+
 
 public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
 
@@ -70,7 +82,8 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
                 private qrcode: NgxScannerQrcodeService,
                 private operacaoService:OperacoesService,
                 public  dialog: MatDialog,
-                private router:Router) 
+                private router:Router,
+                private changeDetectorRef: ChangeDetectorRef) 
     {
      this.user = this.accountService.userValue;
         
@@ -81,9 +94,15 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
       this.disableScanner = true; // desabilita o scanner após a leitura do QR code
     }
     
+
+    atualizar(){
+      this.dataSource = new MatTableDataSource<CardData>(this.initialCardData);
+      this.dataSource.paginator = this.paginator;
+      this.cardData = this.dataSource.connect();
+    }
     
     ngOnInit() {
-    
+     
      //this.RetornarTempo(this.user.id,0);
       if (!this.user.utilizaCupom){
         this.Aviso("Usuário não habilitado para cupom eletrônico!");
@@ -98,7 +117,8 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
         pacote: [, Validators.required],
        
       });
-      
+      this.changeDetectorRef.detectChanges();
+     // this.atualizar();
     }
    
     }
@@ -217,7 +237,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
     excluirLista(){
       this.searchText = '';
       this.pacote = '';
-      this.cardData= [];
+      this.inicializarLista();
       this.canceling = false;
     }
     
@@ -235,22 +255,43 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
       console.log(this.cardData);
     }
 
-    getCurrentPageData() {
+    ListaTaVazia() {
+      this.cardData.pipe(
+        isEmpty()
+      ).subscribe(isEmpty => {
+        if (isEmpty) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+      return true;
+    }
+
+    RetornarListaEmArray(){
+      const card:CardData[] = [];
+      this.cardData.pipe(
+        toArray()
+      ).subscribe(arrayOfCardData => {
+        return arrayOfCardData;
+      });
+
+      return card;
+    }
+
+   /*getCurrentPageData() {
       // Aqui você deve retornar os dados da página atual com base no pageSize e paginaAtual.
       // Pode ser feito com a função slice, por exemplo:
-      const startIndex = (this.paginaAtual - 1) * this.pageSize;
-      const endIndex = startIndex + this.pageSize;
+     // const startIndex = (this.paginaAtual - 1) * this.pageSize;
+      //const endIndex = startIndex + this.pageSize;
       return this.cardData.slice(startIndex, endIndex);
-    }
+    }*/
     
     ListarPorNumeroDoPacote(numeroDoPacote:any){
       this.busy = true;
       this.filtrouPorUsuario = false;
-      this.cardData = [];
-      
+      this.inicializarLista();
      
-
-
       if (this.emlote)
       {
     
@@ -258,9 +299,11 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
             .pipe(first ())
             .subscribe((card:CardData[])=> { 
               this.alertService.clear();
-               this.cardData = card;
-              
+             
+               this.initialCardData = card;
+               this.atualizar();
                this.busy = false;
+            
             },
           (err)=> {
             this.busy = false;
@@ -276,8 +319,12 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
             .pipe(first ())
             .subscribe((card:CardData[])=> { 
               this.alertService.clear();
-               this.cardData.push(...card);
+
+              this.initialCardData.push(...card); 
+              this.atualizar();
+              //this.cardData.push(...card);
                this.busy = false;
+                          
             },
           (err)=> {
             this.busy = false;
@@ -293,14 +340,17 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
       this.busy = true;
       this.filtrouPorUsuario = false;
       this.pacote = '';
-      this.cardData =[];
+     
       this.operacaoService.getAll(valor)
       .pipe(first ())
       .subscribe((card:CardData[])=> { 
-          this.cardData = card;
+          
+
+          this.initialCardData = card;
+          this.atualizar();
           this.RetornarTempo(this.user?.id,0);
 
-          if (this.cardData?.length == 0){
+          if (!this.initialCardData){
              this.action.isReady.pipe(delay(1000)).subscribe(() => {
               this.handle(this.action, 'start');
             });
@@ -342,7 +392,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
     receberValor(valorRecebido:number) {
       var somaElementos:number = 0; // Zera o valor para evitar que a soma acumule em chamadas repetidas.
 
-      for (let elemento of this.cardData) {
+      for (let elemento of this.initialCardData) {
         if (!elemento.flag)
             somaElementos += elemento.tempoTotal;
       }
@@ -358,14 +408,14 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
 
 
       this.alertService.clear();
-      if (this.cardData.length == 0){
+      if (this.ListaTaVazia()){
         this.Aviso("Nenhum Pacote foi selecionado");
         this.loading = false;
           return;
       }
       console.log('loading' +  this.loading);
 
-      this.operacaoService.SalvarPacote(this.cardData)
+      this.operacaoService.SalvarPacote(this.RetornarListaEmArray())
       .pipe(first())
       .subscribe({
           next: () => {
@@ -392,5 +442,13 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
       });
    
      }
+     applyFilter(event: Event) {
+      const filterValue = (event.target as HTMLInputElement).value;
+      this.dataSource.filter = filterValue.trim().toLowerCase();
+  
+      if (this.dataSource.paginator) {
+        this.dataSource.paginator.firstPage();
+      }
+    }
 
 }

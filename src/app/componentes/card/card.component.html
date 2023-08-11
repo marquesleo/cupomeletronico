@@ -1,10 +1,8 @@
 <div class="card card-spacing" style="width: 200px; height: 200px;">
 
-
- 
 <div [ngClass]="cardData.flag ? 'card text-white bg-info ' : 'card bg-warning '">
    
-    <div class="card-body"  style="padding: 5px;">
+    <mat-card-header  style="padding: 5px;">
       <h5 class="card-title">Ref:{{cardData.produtoReferencia}}-{{cardData.produtoDescricao}}</h5>
       <h5 class="colored-text">{{cardData.operacaoPadraoReferencia}}<br>
       Tit:{{cardData.strTituloCupom}}<br>
@@ -12,7 +10,7 @@
    
       <button [disabled]="cardData.foiFeita" type="button" [ngClass]="cardData.flag ? 'btn btn-warning' : 'btn btn-danger'"
                    (click)="AlterarCard()" >{{this.cardData.nomeDoBotao}}</button>
-    </div>
+    </mat-card-header>>
 
 </div>
 
