@@ -232,12 +232,16 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
     
     onPageChange(pageNumber: number) {
       this.paginaAtual = pageNumber;
-      console.log(this.cardData);
+      if (this.paginaAtual > 1){
+           
+      }
+     
     }
 
     getCurrentPageData() {
       // Aqui você deve retornar os dados da página atual com base no pageSize e paginaAtual.
       // Pode ser feito com a função slice, por exemplo:
+      
       const startIndex = (this.paginaAtual - 1) * this.pageSize;
       const endIndex = startIndex + this.pageSize;
       return this.cardData.slice(startIndex, endIndex);
