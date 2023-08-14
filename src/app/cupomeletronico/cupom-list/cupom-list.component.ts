@@ -34,7 +34,7 @@ export class CupomListComponent implements AfterViewInit {
       observer.complete();
     });
   }
-
+  pageEvent:Event;
   buscaPacote:string;
   disableScanner = false;
   form!: FormGroup ;
@@ -44,14 +44,13 @@ export class CupomListComponent implements AfterViewInit {
   submitted = false;
   produto:string="";
   nomeDoOperador:string="";
-  pageSize = 10;
   pacote:string='';
   filtrouPorUsuario = false;
   searchText:string='';
   emlote:boolean = false;
   public paginaAtual = 1;
   public busy: boolean = false;
-  @ViewChild(MatPaginator, { static: false }) paginator: MatPaginator;
+ 
  //  MediaDeviceInfo : MediaDeviceInfo = null!;
  // @ViewChild(QrScannerComponent) qrScannerComponent: QrScannerComponent ;
 
@@ -68,6 +67,7 @@ export class CupomListComponent implements AfterViewInit {
     }
   } 
 };
+@ViewChild(MatPaginator, { static: false }) paginator: MatPaginator;
 dataSource: MatTableDataSource<CardData> = new MatTableDataSource<CardData>(this.initialCardData);
 
 
@@ -94,11 +94,16 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
       this.disableScanner = true; // desabilita o scanner após a leitura do QR code
     }
     
-
+    totalItems = this.initialCardData?.length; // Total number of items
+    pageSize = 8;   // Number of items per page
+    pageSizeOptions = [16, 32, 48, 80]; // Options for page size
     atualizar(){
+      this.changeDetectorRef.detectChanges(); 
       this.dataSource = new MatTableDataSource<CardData>(this.initialCardData);
+     
       this.dataSource.paginator = this.paginator;
       this.cardData = this.dataSource.connect();
+      console.log(this.paginator);
     }
     
     ngOnInit() {
@@ -117,7 +122,9 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
         pacote: [, Validators.required],
        
       });
-      this.changeDetectorRef.detectChanges();
+      this.dataSource.paginator = this.paginator;
+      this.cardData = this.dataSource.connect();
+    
      // this.atualizar();
     }
    
@@ -345,7 +352,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
       .pipe(first ())
       .subscribe((card:CardData[])=> { 
           
-
+        
           this.initialCardData = card;
           this.atualizar();
           this.RetornarTempo(this.user?.id,0);
