@@ -208,6 +208,8 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
       .subscribe((card:CardData[])=> { 
           this.cardData = card;
           if (this.cardData?.length == 0){
+            this.busy = false;
+
             this.action.isReady.pipe(delay(1000)).subscribe(() => {
               this.handle(this.action, 'start');
             });
