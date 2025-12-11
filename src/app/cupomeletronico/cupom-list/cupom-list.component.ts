@@ -189,6 +189,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
       .subscribe((card:CardData[])=> { 
           this.alertService.clear();
           this.cardData = card;
+          console.log(this.cardData);
           this.busy = false;
           
       },

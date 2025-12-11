@@ -30,5 +30,5 @@ export class CardData {
     operacaoPadraoId:number;
     idFuncionario:number;
     grupoPacoteId:number;
-    feiFeita:boolean;
+    foiFeita:boolean;
   }
