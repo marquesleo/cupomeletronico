@@ -1,5 +1,8 @@
 <div class="card" style="width: 100%;">
 
+
+
+  
 <div [ngClass]="flag ? 'card text-white bg-primary mb-3' : 'card bg-warning mb-3'"
 style="height: 100%;">
    
@@ -10,7 +13,7 @@ style="height: 100%;">
      Qtd:{{ cardData.quantidade }}<br>
      Tempo:{{ cardData.tempoTotal }}<br>
    
-      <button [disabled]="cardData.feiFeita" type="button" [ngClass]="flag ? 'btn btn-warning' : 'btn btn-danger'"
+      <button [disabled]="cardData.foiFeita" type="button" [ngClass]="flag ? 'btn btn-warning' : 'btn btn-danger'"
                    (click)="AlterarCard()" >{{nomeDoBotao}}</button>
     </div>
   </div>
