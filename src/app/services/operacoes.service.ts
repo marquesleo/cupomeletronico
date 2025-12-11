@@ -23,7 +23,7 @@ export class OperacoesService {
 
   getAll(id_usuario:number) {
     var url = environment.apiUrl;
-    return this.http.get<CardData[]>(`${url}/v1/Operacao/${id_usuario}`);
+    return this.http.get<CardData[]>(`${url}/v1/Operacao/ObterPorFuncionario/${id_usuario}`);
   }
   getByIdPacote(id_pacote:number) {
     var url = environment.apiUrl;
