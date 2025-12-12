@@ -12,7 +12,17 @@ export class CardComponent implements OnInit {
   constructor() { }
   nomeDoBotao:string="Concluído";
   ngOnInit(): void {
-    this.nomeDoBotao="Concluído";
+   
+     if (this.cardData.foiFeita)
+          this.nomeDoBotao = "Concluído";
+      else{
+
+      if (!this.flag){
+           this.nomeDoBotao = "Lançado";
+      }else
+        this.nomeDoBotao = "Aberto";
+     }
+    
   }
   botaopadrao:string="btn btn-warning";
   botaoalterado:string="btn btn-danger";
@@ -23,12 +33,17 @@ export class CardComponent implements OnInit {
    
      this.flag=!this.flag;
      this.cardData.concluido =  !this.cardData.concluido
-     if (!this.flag){
-       this.nomeDoBotao = "Desfazer";
-     } else
-       this.nomeDoBotao = "Concluído";
-  }
 
+      if (this.cardData.foiFeita)
+          this.nomeDoBotao = "Concluído";
+      else{
+
+      if (!this.flag){
+           this.nomeDoBotao = "Lançado";
+      }else
+        this.nomeDoBotao = "Aberto";
+     }
+    }
   isValidYear(date: Date): boolean {
     if (date ) {
       const year = date.getFullYear();

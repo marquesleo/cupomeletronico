@@ -31,4 +31,5 @@ export class CardData {
     idFuncionario:number;
     grupoPacoteId:number;
     foiFeita:boolean;
+   
   }

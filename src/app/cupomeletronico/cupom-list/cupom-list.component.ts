@@ -66,7 +66,13 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
                 private router:Router) 
     {
      this.user = this.accountService.userValue;
-        
+     document.addEventListener('focusin', (e) => {
+  const target = e.target as HTMLElement;
+
+  if (target.closest('ngx-scanner-qrcode')) {
+    target.blur();
+  }
+});
     }
 
     onScanSuccess(qrCode: Event) {
@@ -96,11 +102,20 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
     get f() { return this.form.controls; }
     
     
-    ngAfterViewInit(): void {
-      
-      this.Listar(this.user.id);
-    
-    }
+  ngAfterViewInit(): void {
+  setTimeout(() => {
+
+    document.addEventListener('focusin', (e) => {
+  const target = e.target as HTMLElement;
+
+  if (target.closest('ngx-scanner-qrcode')) {
+    target.blur();
+  }
+});
+
+    this.Listar(this.user.id);
+  });
+}
 
     public onEvent(qrcode: ScannerQRCodeResult[], action?: any): void {
       qrcode?.length && action && action.pause(); // Detect once and pause scan!
@@ -115,7 +130,11 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
     
     public handle(action: any, fn: string): void {
       
-
+        // *** FIX AQUI ***
+         const el = document.activeElement as HTMLElement;
+           if (el && typeof el.blur === 'function') {
+           el.blur();
+         }
       const playDeviceFacingBack = (devices: ScannerQRCodeDevice[]) => {
         // front camera or back camera check here!
         const device = devices.find(f => (/back|rear|environment/gi.test(f.label))); // Default Back Facing Camera
@@ -160,7 +179,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
        
         this.result = dialogResult;
         if (this.result){
-          this.excluirLista();
+             this.excluirLista();
         }
       });
     }
@@ -168,7 +187,14 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
     
     excluirLista(){
       this.cardData= [];
-      this.canceling = false;
+      this.canceling = false; 
+      this.form.reset();
+           
+      setTimeout(() => {
+        if (this.action) {
+          this.handle(this.action, 'start');
+       }
+        }, 300);
     }
     
     ListarPorNumeroDoPacoteDireto(){
@@ -189,7 +215,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
       .subscribe((card:CardData[])=> { 
           this.alertService.clear();
           this.cardData = card;
-          console.log(this.cardData);
+       
           this.busy = false;
           
       },
@@ -234,6 +260,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
       this.alertService.clear();
       if (this.cardData.length == 0){
           this.alertService.error("Nenhum Pacote foi selecionado");
+            this.loading = false;
           return;
       }
       this.operacaoService.SalvarPacote(this.cardData)
