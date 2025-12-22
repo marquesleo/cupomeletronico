@@ -12,7 +12,10 @@
       Seq:{{cardData.sequencia}}<br>
       Qtd:{{ cardData.quantidade }}<br>
       Tempo:{{ cardData.tempoTotal }}<br>
-      Funcionário:{{cardData.funcionario}}<br>
+      <div *ngIf="cardData.funcionario !=null">
+            Funcionário:{{cardData.funcionario}}<br>
+      </div>
+    
 
       <button 
         [disabled]="cardData.foiFeita" 
@@ -22,6 +25,14 @@
       >
         {{nomeDoBotao}}
       </button>
+       <!-- Q2 no canto inferior direito -->
+      <span
+       *ngIf="cardData?.quebraManual !== null"
+            class="badge bg-secondary"
+            style="font-size: 1.2rem;"
+        >
+          Q2
+    </span>
     </div>
   </div>
 </div>

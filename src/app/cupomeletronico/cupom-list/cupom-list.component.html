@@ -54,22 +54,9 @@
   
   <div class="row align-center">
    <div class="row">
-     <div class="col-sm-6 col-md-4 col-lg-3 col-xs-3" 
-        *ngFor="let card of cardData | paginate: { itemsPerPage: pageSize, currentPage: paginaAtual }" 
-     [ngClass]="{
-          'px-2': (card.quebraManual=='NAO'),
-          'px-10': (card.quebraManual=='SIM')
-        }"
-        >
-      <app-card [cardData]="card"></app-card>
-           <!-- Espaço extra quando quebraManual = true -->
-       <div *ngIf="card.quebraManual=='SIM'" class="col-12 my-4">
-      <hr>
-  </div>    
-
-
+     <div class="col-sm-6 col-md-4 col-lg-3 col-xs-3" *ngFor="let card of cardData | paginate: { itemsPerPage: pageSize, currentPage: paginaAtual }" [ngClass]="{'mb-3': !cardData.length}">
+          <app-card [cardData]="card"></app-card>
      </div>
-
      <pagination-controls (pageChange)="paginaAtual = $event" previousLabel="Anterior" nextLabel="Próximo"></pagination-controls>
    </div>
   </div>
