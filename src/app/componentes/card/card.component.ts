@@ -1,5 +1,5 @@
 import { ElementSchemaRegistry } from '@angular/compiler';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CardData } from 'src/app/models/card';
 
 @Component({
@@ -9,34 +9,41 @@ import { CardData } from 'src/app/models/card';
 })
 export class CardComponent implements OnInit {
   @Input() cardData: CardData;
-  @Output() tempo = new EventEmitter<number>();
-
-
   constructor() { }
+  nomeDoBotao:string="Concluído";
   ngOnInit(): void {
+   
+     if (this.cardData.foiFeita)
+          this.nomeDoBotao = "Concluído";
+      else{
+
+      if (!this.flag){
+           this.nomeDoBotao = "Lançado";
+      }else
+        this.nomeDoBotao = "Aberto";
+     }
     
   }
   botaopadrao:string="btn btn-warning";
   botaoalterado:string="btn btn-danger";
-  cardpadrao:string="card text-white bg-primary ";
-  cardalterado:string="card bg-warning";
-  flag:boolean=false;
- 
+  cardpadrao:string="card text-white bg-primary mb-3";
+  cardalterado:string="card bg-warning mb-3";
+  flag:boolean = true;
   AlterarCard(): void {
    
-    this.cardData.flag=!this.cardData.flag;
+     this.flag=!this.flag;
      this.cardData.concluido =  !this.cardData.concluido
-     if (!this.cardData.flag){
-       this.cardData.nomeDoBotao = "Desfazer";
-       this.tempo.emit(this.cardData.tempoTotal);
-     } else{
-       this.cardData.nomeDoBotao = "Concluído";
-       this.tempo.emit(0);
-       
-     }
-      
-  }
 
+      if (this.cardData.foiFeita)
+          this.nomeDoBotao = "Concluído";
+      else{
+
+      if (!this.flag){
+           this.nomeDoBotao = "Lançado";
+      }else
+        this.nomeDoBotao = "Aberto";
+     }
+    }
   isValidYear(date: Date): boolean {
     if (date ) {
       const year = date.getFullYear();
