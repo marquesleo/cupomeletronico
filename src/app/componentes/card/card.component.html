@@ -1,19 +1,38 @@
-<div class="card card-spacing" style="width: 200px; height: 200px;">
+<div class="card" style="width: 100%;">
+  <div 
+    [ngClass]="{
+    'card text-white bg-primary mb-3': flag && !cardData.foiFeita,
+    'card bg-warning mb-3': !flag && !cardData.foiFeita,
+    'card bg-secondary text-white mb-3 card-disabled': cardData.foiFeita
+  }"
+  >
+    <div class="card-body">
+      <h4 class="card-title">Ref:{{cardData.pacoteReferencia}}-{{cardData.produtoDescricao}}</h4>
+      Tit:{{cardData.tituloCupom}}<br>
+      Seq:{{cardData.sequencia}}<br>
+      Qtd:{{ cardData.quantidade }}<br>
+      Tempo:{{ cardData.tempoTotal }}<br>
+      <div *ngIf="cardData.funcionario !=null">
+            Funcionário:{{cardData.funcionario}}<br>
+      </div>
+    
 
-
- 
-<div [ngClass]="cardData.flag ? 'card text-white bg-info ' : 'card bg-warning '">
-   
-    <div class="card-body"  style="padding: 5px;">
-      <h5 class="card-title">Ref:{{cardData.produtoReferencia}}-{{cardData.produtoDescricao}}</h5>
-      <h5 class="colored-text">{{cardData.operacaoPadraoReferencia}}<br>
-      Tit:{{cardData.strTituloCupom}}<br>
-      Seq:{{cardData.sequencia}} Qtd:{{ cardData.quantidade }} Tempo:{{ cardData.tempoTotal }}<br></h5>
-   
-      <button [disabled]="cardData.foiFeita" type="button" [ngClass]="cardData.flag ? 'btn btn-warning' : 'btn btn-danger'"
-                   (click)="AlterarCard()" >{{this.cardData.nomeDoBotao}}</button>
+      <button 
+        [disabled]="cardData.foiFeita" 
+        type="button" 
+        [ngClass]="flag ? 'btn btn-warning' : 'btn btn-danger'"
+        (click)="AlterarCard()"
+      >
+        {{nomeDoBotao}}
+      </button>
+       <!-- Q2 no canto inferior direito -->
+      <span
+       *ngIf="cardData?.quebraManual !== null"
+            class="badge bg-secondary"
+            style="font-size: 1.2rem;"
+        >
+          Q2
+    </span>
     </div>
-
-</div>
-
+  </div>
 </div>
