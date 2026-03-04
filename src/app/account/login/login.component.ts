@@ -18,6 +18,7 @@ export class LoginComponent implements AfterViewInit {
   form!: FormGroup ;
   loading = false;
   submitted = false;
+  selectedDeviceId!: string;
  //  MediaDeviceInfo : MediaDeviceInfo = null!;
  // @ViewChild(QrScannerComponent) qrScannerComponent: QrScannerComponent ;
 
@@ -71,14 +72,67 @@ get f() { return this.form.controls; }
 
 ngAfterViewInit(): void {
    this.disableScanner = true; 
- this.action.isReady.pipe(delay(2000)).subscribe(() => {
-    this.handle(this.action, 'start');
+ this.action.isReady.subscribe(() => {
+
+    // primeiro inicia o scanner
+   /* this.action.start().subscribe(() => {
+
+      // espera um pouco para garantir que devices carregaram
+      setTimeout(() => {
+
+        const devices = this.action.devices.value;
+
+        if (devices && devices.length > 1) {
+          const secondDevice = devices[1];
+          this.selectedDeviceId = secondDevice.deviceId;
+          this.action.playDevice(secondDevice.deviceId);
+        }else if (devices && devices.length > 0) {
+          this.selectedDeviceId = devices[0].deviceId;
+          this.action.playDevice(devices[0].deviceId);
+        }
+
+
+      }, 500);
+
+    });*/
+
+    this.action.isReady.subscribe(() => {
+
+    this.action.start().subscribe(() => {
+
+      this.action.devices.subscribe((devices) => {
+
+        if (!devices || devices.length === 0) return;
+
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+        if (isMobile) {
+          // 📱 tenta pegar câmera traseira
+          const backCamera = devices.find(d =>
+            /back|rear|environment/gi.test(d.label)
+          );
+
+          if (backCamera) {
+            this.selectedDeviceId = backCamera.deviceId;
+            this.action.playDevice(backCamera.deviceId);
+          }
+        }
+
+        // 💻 no desktop não força nada (mantém padrão)
+
+      });
+
+    });
+
   });
+
+  });
+  
 }
 
 public onEvent(qrcode: ScannerQRCodeResult[], action?: any): void {
   qrcode?.length && action && action.pause(); // Detect once and pause scan!
-  console.log(qrcode);
+  
   if (qrcode.length > 0){
     const valor = qrcode[0].value;
     this.Gravar(valor);

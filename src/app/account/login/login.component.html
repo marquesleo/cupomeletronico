@@ -16,10 +16,10 @@
           <div class="col-12">
             <select
               class="form-select form-select-sm w-100"
-              [ngModel]="null"
+              [ngModel]="selectedDeviceId"
               (ngModelChange)="action.playDevice($event)">
 
-              <option [value]="null" selected>Select device</option>
+              <option [value]="selectedDeviceId" selected>Select device</option>
               <option
                 *ngFor="let c of action.devices.value; let i = index"
                 [ngValue]="c.deviceId">
