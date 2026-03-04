@@ -53,7 +53,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
 
 
 onScanSuccess(qrCode: Event) {
-  console.log(qrCode.target);
+ 
   this.disableScanner = true; // desabilita o scanner após a leitura do QR code
 }
 
@@ -70,7 +70,8 @@ get f() { return this.form.controls; }
 
 
 ngAfterViewInit(): void {
- this.action.isReady.pipe(delay(1000)).subscribe(() => {
+   this.disableScanner = true; 
+ this.action.isReady.pipe(delay(2000)).subscribe(() => {
     this.handle(this.action, 'start');
   });
 }
@@ -87,7 +88,7 @@ public onEvent(qrcode: ScannerQRCodeResult[], action?: any): void {
 
 public handle(action: any, fn: string): void {
     const playDeviceFacingBack = (devices: ScannerQRCodeDevice[]) => {
-    // front camera or back camera check here!
+    //front camera or back camera check here!
     const device = devices.find(f => (/back|rear|environment/gi.test(f.label))); // Default Back Facing Camera
     action.playDevice(device ? device.deviceId : devices[0].deviceId);
   }
@@ -129,7 +130,7 @@ Gravar(codigoQrCode:string) {
   this.loading = true;
   this.accountService.login(codigoQrCode)
        .subscribe((data:any)=>{
-       // get return url from query parameters or default to home page
+       this.handle(this.action, 'stop');
        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
        this.router.navigateByUrl(returnUrl);
     },

@@ -96,7 +96,7 @@ export const loadEnvironmentConfig = (http: HttpClient) => {
     { provide: HTTP_INTERCEPTORS, useClass: CorsInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
-    { provide: APP_INITIALIZER, useFactory: appInitializer, multi: true, deps: [AccountService] },
+    //{ provide: APP_INITIALIZER, useFactory: appInitializer, multi: true, deps: [AccountService] },
     { provide: APP_INITIALIZER, useFactory: loadEnvironmentConfig, multi: true, deps: [HttpClient] },
   ],
   entryComponents: [ ConfirmationDialogComponent ],
