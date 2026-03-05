@@ -305,9 +305,39 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
           this.RetornarTempo(this.user?.id,0);
 
           if (this.cardData?.length == 0){
-             this.action.isReady.pipe(delay(1000)).subscribe(() => {
-              this.handle(this.action, 'start');
-            });
+           this.action.isReady.subscribe(() => {
+
+           this.action.start().subscribe(() => {
+
+           this.action.devices.subscribe((devices) => {
+
+           if (!devices || devices.length === 0) return;
+
+            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+             if (isMobile) {
+               // 📱 tenta pegar câmera traseira
+                 const backCamera = devices.find(d =>
+                  /back|rear|environment/gi.test(d.label)
+                );
+
+               if (backCamera) {
+                 this.action.playDevice(backCamera.deviceId);
+               }
+             }
+
+        // 💻 no desktop não força nada (mantém padrão)
+
+      });
+
+    });
+
+  });
+
+
+
+
+
           }else{
             this.filtrouPorUsuario = true;
           }

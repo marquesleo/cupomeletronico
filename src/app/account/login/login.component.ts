@@ -72,30 +72,7 @@ get f() { return this.form.controls; }
 
 ngAfterViewInit(): void {
    this.disableScanner = true; 
- this.action.isReady.subscribe(() => {
-
-    // primeiro inicia o scanner
-   /* this.action.start().subscribe(() => {
-
-      // espera um pouco para garantir que devices carregaram
-      setTimeout(() => {
-
-        const devices = this.action.devices.value;
-
-        if (devices && devices.length > 1) {
-          const secondDevice = devices[1];
-          this.selectedDeviceId = secondDevice.deviceId;
-          this.action.playDevice(secondDevice.deviceId);
-        }else if (devices && devices.length > 0) {
-          this.selectedDeviceId = devices[0].deviceId;
-          this.action.playDevice(devices[0].deviceId);
-        }
-
-
-      }, 500);
-
-    });*/
-
+   // primeiro inicia o scanner
     this.action.isReady.subscribe(() => {
 
     this.action.start().subscribe(() => {
@@ -123,8 +100,6 @@ ngAfterViewInit(): void {
       });
 
     });
-
-  });
 
   });
   
@@ -180,13 +155,13 @@ Gravar(codigoQrCode:string) {
      codigoQrCode = this.form.controls["username"].value
   }
   
-
   this.loading = true;
   this.accountService.login(codigoQrCode)
        .subscribe((data:any)=>{
-       this.handle(this.action, 'stop');
+      
        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
        this.router.navigateByUrl(returnUrl);
+        this.handle(this.action, 'stop');
     },
      (err)=> {
        this.alertService.clear();
