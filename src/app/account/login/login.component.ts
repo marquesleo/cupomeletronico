@@ -160,8 +160,8 @@ Gravar(codigoQrCode:string) {
        .subscribe((data:any)=>{
       
        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-       this.router.navigateByUrl(returnUrl);
-        this.handle(this.action, 'stop');
+       this.router.navigate(['/cupomeletronico']);
+       this.handle(this.action, 'stop');
     },
      (err)=> {
        this.alertService.clear();

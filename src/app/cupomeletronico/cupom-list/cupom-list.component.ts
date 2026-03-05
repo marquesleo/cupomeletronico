@@ -9,11 +9,7 @@ import { OperacoesService } from 'src/app/services/operacoes.service';
 import { first } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent, ConfirmDialogModel } from 'src/app/componentes/confirmation-dialog/confirmation-dialog.component';
-import { delay } from 'rxjs';
-import { AlertComponent } from 'src/app/componentes/alert/alert.component';
 import { AlertDialogComponent } from 'src/app/componentes/alert-dialog/alert-dialog.component';
-import { FormControl } from '@angular/forms';
-import { OnInit } from '@angular/core';
 import { User } from 'src/app/models';
 
 
@@ -77,7 +73,6 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
     }
 
     onScanSuccess(qrCode: Event) {
-    
       this.disableScanner = true; // desabilita o scanner após a leitura do QR code
     }
     
@@ -110,7 +105,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
     ngAfterViewInit(): void {
       
       this.Listar(this.user.id);
-     
+ 
     
     }
     private lstEmlote:string[] = [];
@@ -219,6 +214,9 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
       this.pacote = '';
       this.cardData= [];
       this.canceling = false;
+      this .Listar(this.user.id);
+
+
     }
     
     ListarPorNumeroDoPacoteDireto(){
@@ -252,9 +250,6 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
       this.filtrouPorUsuario = false;
       this.cardData = [];
       
-     
-
-
       if (this.emlote)
       {
     
@@ -280,6 +275,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
             .pipe(first ())
             .subscribe((card:CardData[])=> { 
               this.alertService.clear();
+              this.cardData = [];
                this.cardData.push(...card);
                this.busy = false;
             },
@@ -301,6 +297,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
       this.operacaoService.getAll(valor)
       .pipe(first ())
       .subscribe((card:CardData[])=> { 
+          this.cardData =[];
           this.cardData = card;
           this.RetornarTempo(this.user?.id,0);
 
