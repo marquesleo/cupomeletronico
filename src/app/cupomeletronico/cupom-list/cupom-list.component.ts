@@ -58,7 +58,15 @@ export class CupomListComponent implements AfterViewInit {
 public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
 
 
-@ViewChild('action') action: NgxScannerQrcodeComponent
+@ViewChild('action')
+set scanner(content: NgxScannerQrcodeComponent) {
+  if (content) {
+    this.action = content;
+    console.log("Scanner carregado");
+  }
+}
+
+action!: NgxScannerQrcodeComponent;
 
     constructor(private accountService: AccountService,
                 private formBuilder: FormBuilder,
@@ -145,7 +153,6 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
     
     public handle(action: any, fn: string): void {
       
-
       const playDeviceFacingBack = (devices: ScannerQRCodeDevice[]) => {
         // front camera or back camera check here!
         const device = devices.find(f => (/back|rear|environment/gi.test(f.label))); // Default Back Facing Camera
@@ -158,8 +165,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
         action[fn]().subscribe((r: any) => console.log(fn, r), alert);
       }
     }
-    
-    
+        
     public onSelects(files: any): void {
       this.qrcode.loadFiles(files).subscribe((res: ScannerQRCodeSelectedFiles[]) => {
         this.qrCodeResult = res;
@@ -210,13 +216,17 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
     
     
     excluirLista(){
+     /*  if (this.action) {
+           this.IniciarCamera();
+      } else {
+         this.IniciarCamera();
+      }
       this.searchText = '';
       this.pacote = '';
       this.cardData= [];
       this.canceling = false;
-      this .Listar(this.user.id);
-
-
+      */
+     this.ngAfterViewInit();
     }
     
     ListarPorNumeroDoPacoteDireto(){
@@ -230,10 +240,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
     
     onPageChange(pageNumber: number) {
       this.paginaAtual = pageNumber;
-      if (this.paginaAtual > 1){
-           
-      }
-     
+         
     }
 
     getCurrentPageData() {
@@ -257,9 +264,8 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
             .pipe(first ())
             .subscribe((card:CardData[])=> { 
               this.alertService.clear();
-               this.cardData = card;
-              
-               this.busy = false;
+              this.cardData = card;
+              this.busy = false;
             },
           (err)=> {
             this.busy = false;
@@ -302,7 +308,28 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
           this.RetornarTempo(this.user?.id, 0);
 
           if (this.cardData?.length == 0){
-           this.action.isReady.subscribe(() => {
+            this.IniciarCamera();
+          }
+          else
+          {
+            this.filtrouPorUsuario = true;
+          }
+          this.busy = false;
+          
+      },
+      (err)=> {
+        this.busy = false;
+        this.alertService.error(err);
+        this.IniciarCamera();
+      },
+      
+      );
+    }
+
+
+    IniciarCamera(){
+      if (!this.action) return;
+       this.action.isReady.subscribe(() => {
 
            this.action.start().subscribe(() => {
 
@@ -330,24 +357,8 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
     });
 
   });
+}
 
-
-
-
-
-          }else{
-            this.filtrouPorUsuario = true;
-          }
-          this.busy = false;
-          
-      },
-      (err)=> {
-        this.busy = false;
-        this.alertService.error(err);
-      },
-      
-      );
-    }
 
     RetornarTempo(valor :number,somaDosSelecionados:number): void {
       this.busy = true;
@@ -364,7 +375,6 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
       },
       (err)=> {
         this.busy = false;
-        this.alertService.error(err);
       },
       
       );
@@ -385,16 +395,14 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
      onSubmit() {
      
       this.loading = true;
-      // reset alerts on submit
-
-
+      
       this.alertService.clear();
       if (this.cardData.length == 0){
         this.Aviso("Nenhum Pacote foi selecionado");
         this.loading = false;
           return;
       }
-      console.log('loading' +  this.loading);
+    
 
       this.operacaoService.SalvarPacote(this.cardData)
       .pipe(first())
@@ -418,6 +426,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
           },
           complete: ()=> {
             this.loading = false;
+            this.excluirLista();
             
           }
       });

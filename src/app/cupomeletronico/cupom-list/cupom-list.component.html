@@ -34,7 +34,7 @@
 
            <!-- start/stop -->
            <button class="btn" [class.btn-info]="!action.isStart" [class.btn-warning]="action.isStart" [disabled]="action.isLoading" (click)="handle(action, action.isStart ? 'stop' : 'start')">
-<img [src]="action.isStart ? 'https://id1945.github.io/images/svg/camera-off.svg' : 'https://id1945.github.io/images/svg/camera-on.svg'" width="30px"/>
+            <img [src]="action.isStart ? 'https://id1945.github.io/images/svg/camera-off.svg' : 'https://id1945.github.io/images/svg/camera-on.svg'" width="30px"/>
            </button>
 
           <!-- play/pause -->
@@ -46,7 +46,8 @@
    <div class="row">
        <input type="text" class="form-control" [(ngModel)]="pacote" placeholder="Digite sua busca">
        <button class="btn btn-primary" (click)="ListarPorNumeroDoPacoteDireto()">Filtrar</button>
-  </div> </div>
+  </div> 
+</div>
  
 <br>
 <div *ngIf="busy">
