@@ -299,7 +299,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
       .subscribe((card:CardData[])=> { 
           this.cardData =[];
           this.cardData = card;
-          this.RetornarTempo(this.user?.id,0);
+          this.RetornarTempo(this.user?.id, 0);
 
           if (this.cardData?.length == 0){
            this.action.isReady.subscribe(() => {
