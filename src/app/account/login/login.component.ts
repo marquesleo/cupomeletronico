@@ -38,8 +38,16 @@ export class LoginComponent implements AfterViewInit {
 
 public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
 
+@ViewChild('action')
+set scanner(content: NgxScannerQrcodeComponent) {
+  if (content) {
+    this.action = content;
+    console.log("Scanner carregado");
+  }
+}
 
-@ViewChild('action') action: NgxScannerQrcodeComponent
+action!: NgxScannerQrcodeComponent;
+
 
   constructor(
     private formBuilder: FormBuilder,
@@ -72,28 +80,27 @@ get f() { return this.form.controls; }
 
 ngAfterViewInit(): void {
    this.disableScanner = true; 
-   // primeiro inicia o scanner
-    this.action.isReady.subscribe(() => {
+   if (!this.action) return;
+       this.action.isReady.subscribe(() => {
 
-    this.action.start().subscribe(() => {
+           this.action.start().subscribe(() => {
 
-      this.action.devices.subscribe((devices) => {
+           this.action.devices.subscribe((devices) => {
 
-        if (!devices || devices.length === 0) return;
+           if (!devices || devices.length === 0) return;
 
-        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-        if (isMobile) {
-          // 📱 tenta pegar câmera traseira
-          const backCamera = devices.find(d =>
-            /back|rear|environment/gi.test(d.label)
-          );
+             if (isMobile) {
+               // 📱 tenta pegar câmera traseira
+                 const backCamera = devices.find(d =>
+                  /back|rear|environment/gi.test(d.label)
+                );
 
-          if (backCamera) {
-            this.selectedDeviceId = backCamera.deviceId;
-            this.action.playDevice(backCamera.deviceId);
-          }
-        }
+               if (backCamera) {
+                 this.action.playDevice(backCamera.deviceId);
+               }
+             }
 
         // 💻 no desktop não força nada (mantém padrão)
 
@@ -102,7 +109,7 @@ ngAfterViewInit(): void {
     });
 
   });
-  
+ 
 }
 
 public onEvent(qrcode: ScannerQRCodeResult[], action?: any): void {
