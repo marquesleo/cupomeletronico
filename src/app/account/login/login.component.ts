@@ -80,11 +80,23 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
 
         this.devices = devices;
 
-        if (devices.length > 0) {
+          if (!devices || devices.length === 0) return;
 
-          this.selectedDeviceId = devices[0].deviceId;
+            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-        }
+             if (isMobile) {
+               // 📱 tenta pegar câmera traseira
+                 const backCamera = devices.find(d =>
+                  /back|rear|environment/gi.test(d.label)
+                );
+
+               if (backCamera) {
+                 this.action.playDevice(backCamera.deviceId);
+               }
+             }else{
+                this.selectedDeviceId = devices[0].deviceId;
+                
+             }
 
       });
 

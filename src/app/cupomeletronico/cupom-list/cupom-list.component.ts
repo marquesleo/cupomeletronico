@@ -356,7 +356,7 @@ action!: NgxScannerQrcodeComponent;
                }
              }
 
-        // 💻 no desktop não força nada (mantém padrão)
+            // 💻 no desktop não força nada (mantém padrão)
 
       });
 
