@@ -83,6 +83,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
           if (!devices || devices.length === 0) return;
 
             const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+            console.log(navigator.userAgent);
 
              if (isMobile) {
                // 📱 tenta pegar câmera traseira
@@ -90,12 +91,17 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
                   /back|rear|environment/gi.test(d.label)
                 );
 
+                console.log("Câmeras encontradas:", devices);
+                console.log("Câmera traseira selecionada:", backCamera);
+
+
                if (backCamera) {
                  this.action.playDevice(backCamera.deviceId);
+                 this.selectedDeviceId = backCamera.deviceId;
                }
              }else{
                 this.selectedDeviceId = devices[0].deviceId;
-                
+
              }
 
       });
