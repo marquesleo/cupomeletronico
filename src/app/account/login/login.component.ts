@@ -1,181 +1,169 @@
-import { AfterViewInit,Component,  ViewChild, ViewEncapsulation,HostListener } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import {
+  Component,
+  ViewChild,
+  AfterViewInit,
+  OnDestroy
+} from '@angular/core';
+
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
+
+import {
+  NgxScannerQrcodeComponent,
+  ScannerQRCodeConfig,
+  ScannerQRCodeDevice,
+  ScannerQRCodeResult
+} from 'ngx-scanner-qrcode';
 import { AccountService } from 'src/app/services/account.service';
 import { AlertService } from 'src/app/services/alert.service';
-import { NgxScannerQrcodeComponent, NgxScannerQrcodeService, ScannerQRCodeConfig, ScannerQRCodeDevice, ScannerQRCodeResult, ScannerQRCodeSelectedFiles } from 'ngx-scanner-qrcode';
-import { delay } from 'rxjs';
-
 
 @Component({
   selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css'],
-  encapsulation: ViewEncapsulation.None
+  templateUrl: './login.component.html'
 })
-export class LoginComponent implements AfterViewInit {
-  disableScanner = false;
-  form!: FormGroup ;
+export class LoginComponent implements AfterViewInit, OnDestroy {
+
+  form!: FormGroup;
   loading = false;
   submitted = false;
+
+  scannerEnabled = true;
+
+  devices: ScannerQRCodeDevice[] = [];
   selectedDeviceId!: string;
- //  MediaDeviceInfo : MediaDeviceInfo = null!;
- // @ViewChild(QrScannerComponent) qrScannerComponent: QrScannerComponent ;
 
- public config: ScannerQRCodeConfig = {
-  // fps: 1000,
-  vibrate: 400,
-  // isBeep: true,
-  // decode: 'macintosh',
-  deviceActive: 0, // Camera 1 active
-  constraints: { 
-    audio: false,
-    video: {
-      width: window.innerWidth
+  @ViewChild('action')
+  action!: NgxScannerQrcodeComponent;
+
+  config: ScannerQRCodeConfig = {
+    vibrate: 400,
+    deviceActive: 0,
+    constraints: {
+      audio: false,
+      video: {
+        width: window.innerWidth
+      }
     }
-  } 
-};
-
-public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
-
-@ViewChild('action')
-set scanner(content: NgxScannerQrcodeComponent) {
-  if (content) {
-    this.action = content;
-    console.log("Scanner carregado");
-  }
-}
-
-action!: NgxScannerQrcodeComponent;
-
+  };
 
   constructor(
     private formBuilder: FormBuilder,
-    private route: ActivatedRoute,
     private router: Router,
+    private route: ActivatedRoute,
     private accountService: AccountService,
     private alertService: AlertService,
-    private qrcode: NgxScannerQrcodeService
-    
-) { }
+  ) {}
 
+  ngOnInit() {
 
-
-onScanSuccess(qrCode: Event) {
- 
-  this.disableScanner = true; // desabilita o scanner após a leitura do QR code
-}
-
-
-ngOnInit() {
-  this.form = this.formBuilder.group({
-      username: [, Validators.required],
-      combo: ['',Validators.required]
+    this.form = this.formBuilder.group({
+      username: ['', Validators.required]
     });
+
   }
 
-// convenience getter for easy access to form fields
-get f() { return this.form.controls; }
+  ngAfterViewInit() {
 
+    setTimeout(() => {
+      this.startScanner();
+    }, 300);
 
-ngAfterViewInit(): void {
-   this.disableScanner = true; 
-   if (!this.action) return;
-       this.action.isReady.subscribe(() => {
+  }
 
-           this.action.start().subscribe(() => {
+  startScanner() {
 
-           this.action.devices.subscribe((devices) => {
+    if (!this.action) return;
 
-           if (!devices || devices.length === 0) return;
+    this.action.start().subscribe(() => {
 
-            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      this.action.devices.subscribe((devices) => {
 
-             if (isMobile) {
-               // 📱 tenta pegar câmera traseira
-                 const backCamera = devices.find(d =>
-                  /back|rear|environment/gi.test(d.label)
-                );
+        this.devices = devices;
 
-               if (backCamera) {
-                 this.action.playDevice(backCamera.deviceId);
-               }
-             }
+        if (devices.length > 0) {
 
-        // 💻 no desktop não força nada (mantém padrão)
+          this.selectedDeviceId = devices[0].deviceId;
+
+        }
 
       });
 
     });
 
-  });
- 
-}
+  }
 
-public onEvent(qrcode: ScannerQRCodeResult[], action?: any): void {
-  qrcode?.length && action && action.pause(); // Detect once and pause scan!
-  
-  if (qrcode.length > 0){
+  changeCamera(deviceId: string) {
+
+    this.selectedDeviceId = deviceId;
+
+    if (this.action) {
+      this.action.playDevice(deviceId);
+    }
+
+  }
+
+  onEvent(qrcode: ScannerQRCodeResult[]) {
+
+    if (!qrcode || qrcode.length === 0) return;
+
     const valor = qrcode[0].value;
-    this.Gravar(valor);
-  }
-}
 
+    this.action.pause().subscribe();
 
-public handle(action: any, fn: string): void {
-    const playDeviceFacingBack = (devices: ScannerQRCodeDevice[]) => {
-    //front camera or back camera check here!
-    const device = devices.find(f => (/back|rear|environment/gi.test(f.label))); // Default Back Facing Camera
-    action.playDevice(device ? device.deviceId : devices[0].deviceId);
+    this.Logar(valor);
+
   }
 
-  if (fn === 'start') {
-    action[fn](playDeviceFacingBack).subscribe((r: any) => console.log(fn, r), alert);
-  } else {
-    action[fn]().subscribe((r: any) => console.log(fn, r), alert);
+  restartScanner() {
+
+    this.scannerEnabled = false;
+
+    setTimeout(() => {
+      this.scannerEnabled = true;
+    }, 200);
+
   }
-}
 
-
-public onSelects(files: any): void {
-  this.qrcode.loadFiles(files).subscribe((res: ScannerQRCodeSelectedFiles[]) => {
-    this.qrCodeResult = res;
-  });
-}
-
-
-onSubmit() {
-  this.Gravar("");  
-}
-
-Gravar(codigoQrCode:string) {
-   this.submitted = true;
-
-  // reset alerts on submit
-  this.alertService.clear();
-
-  // stop here if form is invalid
-  /*if (this.form.invalid) {
-      return;
-  }*/
-  if (!codigoQrCode){
-     codigoQrCode = this.form.controls["username"].value
+  Logar(valor:string) { 
+    this.accountService.login(valor).subscribe
+      ((data:any)=>
+       { 
+        this.router.navigate(['/cupomeletronico']);
+       },
+       (err)=> 
+       { this.alertService.clear();
+         this.alertService.error(err);
+         this.loading = false;
+        } 
+     );
   }
-  
-  this.loading = true;
-  this.accountService.login(codigoQrCode)
-       .subscribe((data:any)=>{
-      
-       const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-       this.router.navigate(['/cupomeletronico']);
-       this.handle(this.action, 'stop');
-    },
-     (err)=> {
-       this.alertService.clear();
-      this.alertService.error(err);
-      this.loading = false;
-     }
-    );
-}  
-  
+
+  Gravar(valor: string) {
+
+    this.submitted = true; // reset alerts on submit 
+    this.alertService.clear(); // stop here if form is invalid 
+    if (this.form.invalid) { return; }
+
+
+    if (!valor) {
+      valor = this.form.controls["username"].value;
+    }
+
+    this.Logar(valor);
+
+   
+  }
+
+  ngOnDestroy() {
+
+    if (this.action) {
+      this.action.stop().subscribe();
+    }
+
+  }
+
+  get f() {
+    return this.form.controls;
+  }
+
 }

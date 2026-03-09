@@ -62,7 +62,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
 set scanner(content: NgxScannerQrcodeComponent) {
   if (content) {
     this.action = content;
-    console.log("Scanner carregado");
+    
   }
 }
 
@@ -308,7 +308,11 @@ action!: NgxScannerQrcodeComponent;
           this.RetornarTempo(this.user?.id, 0);
 
           if (this.cardData?.length == 0){
-            this.IniciarCamera();
+            
+            setTimeout(() => {
+               this.IniciarCamera();
+             }, 300);
+
           }
           else
           {
@@ -320,7 +324,9 @@ action!: NgxScannerQrcodeComponent;
       (err)=> {
         this.busy = false;
         this.alertService.error(err);
-        this.IniciarCamera();
+        setTimeout(() => {
+          this.IniciarCamera();
+        }, 300);
       },
       
       );

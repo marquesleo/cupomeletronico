@@ -1,122 +1,39 @@
 <div class="container min-vh-100 d-flex align-items-center justify-content-center">
-
-  <div class="col-12 col-sm-10 col-md-8 col-lg-6">
-    <div class="card shadow">
-
-      <!-- HEADER -->
-      <h4 class="card-header text-center">
-        Login
-      </h4>
-
-      <!-- BODY -->
-      <div class="card-body">
-
-        <!-- SELECT DEVICE -->
-        <div class="row mb-3">
-          <div class="col-12">
-            <select
-              class="form-select form-select-sm w-100"
-              [ngModel]="selectedDeviceId"
-              (ngModelChange)="action.playDevice($event)">
-
-              <option [value]="selectedDeviceId" selected>Select device</option>
-              <option
-                *ngFor="let c of action.devices.value; let i = index"
-                [ngValue]="c.deviceId">
-                {{ c.label }}
-              </option>
-
-            </select>
-          </div>
-        </div>
-
-        <!-- QR SCANNER -->
-        <div class="row justify-content-center mb-3">
-          <div class="col-12 col-md-10 text-center">
-
-            <ngx-scanner-qrcode
-              #action="scanner"
-              [config]="config"
-              (event)="onEvent($event)">
-            </ngx-scanner-qrcode>
-
-            <p *ngIf="action.isLoading" class="mt-2">
-              ⌛ Loading...
-            </p>
-
-          </div>
-        </div>
-
-        <!-- CONTROLS -->
-        <div class="row justify-content-center mb-4">
-          <div class="col-auto d-flex gap-3">
-
-            <!-- START / STOP -->
-            <button
-              class="btn"
-              [class.btn-info]="!action.isStart"
-              [class.btn-warning]="action.isStart"
-              [disabled]="action.isLoading"
-              (click)="handle(action, action.isStart ? 'stop' : 'start')">
-
-              <img
-                [src]="action.isStart
-                  ? 'https://id1945.github.io/images/svg/camera-off.svg'
-                  : 'https://id1945.github.io/images/svg/camera-on.svg'"
-                width="30" />
-
-            </button>
-
-            <!-- PLAY / PAUSE -->
-            <button
-              class="btn"
-              [class.btn-info]="!action.isStart"
-              [class.btn-warning]="action.isStart"
-              [disabled]="!action.isStart"
-              (click)="handle(action, action.isPause ? 'play' : 'pause')">
-
-              <img
-                [src]="action.isPause
-                  ? 'https://id1945.github.io/images/svg/play.svg'
-                  : 'https://id1945.github.io/images/svg/pause.svg'"
-                width="30" />
-
-            </button>
-
-          </div>
-        </div>
-
-        <!-- FORM -->
-        <form [formGroup]="form" (ngSubmit)="onSubmit()">
-
-          <div class="form-group mb-3">
-            <label for="username">Usuário</label>
-
-            <input
-              id="username"
-              type="text"
-              formControlName="username"
-              class="form-control w-100"
-              [ngClass]="{ 'is-invalid': submitted && f.username.errors }" />
-
-            <div *ngIf="submitted && f.username.errors" class="invalid-feedback">
-              <div *ngIf="f.username.errors.required">
-                Login é obrigatório
-              </div>
+   <div class="col-12 col-sm-10 col-md-8 col-lg-6"> 
+        <div class="card shadow">
+           <h4 class="card-header text-center">Login </h4> 
+           <div class="card-body"> 
+            <!-- COMBOBOX CAMERA -->
+              <div class="row mb-3">
+                 <div class="col-12">
+                    <select class="form-select form-select-sm w-100" [ngModel]="selectedDeviceId" (ngModelChange)="changeCamera($event)"> 
+                      <option value="">Selecione a câmera</option> 
+                      <option *ngFor="let device of devices" [value]="device.deviceId"> 
+                        {{ device.label || ('Camera ' + device.deviceId) }} </option> 
+                    </select>
+                   </div> </div> <!-- SCANNER -->
+                 <div class="row justify-content-center mb-3">
+               <div class="col-12 col-md-10 text-center">
+               <ngx-scanner-qrcode *ngIf="scannerEnabled" #action="scanner" [config]="config" (event)="onEvent($event)"> 
+               </ngx-scanner-qrcode> <p *ngIf="action?.isLoading" class="mt-2"> ⌛ Carregando câmera... </p> 
+          </div> </div> <!-- BOTÕES --> 
+          <div class="row justify-content-center mb-4">
+            <div class="col-auto d-flex gap-3">
+               <button class="btn btn-info" (click)="startScanner()"> Iniciar Camera </button> 
+               <button class="btn btn-warning" (click)="restartScanner()"> Restartar Camera </button> 
             </div>
           </div>
-
-          <button class="btn btn-primary w-100" [disabled]="loading">
-            <span
-              *ngIf="loading"
-              class="spinner-border spinner-border-sm me-1">
-            </span>
-            Logar
-          </button>
-
-        </form>
-
+           <!-- FORM LOGIN -->
+           <form [formGroup]="form" (ngSubmit)="Gravar('')">
+             <div class="form-group mb-3"> 
+              <label for="username">Usuário</label>
+               <input id="username" type="text" formControlName="username" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.username.errors }" />
+               <div *ngIf="submitted && f.username.errors" class="invalid-feedback"> Login é obrigatório </div>
+               </div> 
+               <button class="btn btn-primary w-100" [disabled]="loading"> 
+              <span *ngIf="loading" class="spinner-border spinner-border-sm me-1"> </span> Logar </button>
+            </form>
+           </div>
+         </div>
       </div>
-    </div>
-  </div>
-</div>
+ </div>
