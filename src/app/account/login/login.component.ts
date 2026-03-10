@@ -14,7 +14,7 @@ import {
   ScannerQRCodeDevice,
   ScannerQRCodeResult
 } from 'ngx-scanner-qrcode';
-import { filter } from 'rxjs';
+import { filter, finalize, first } from 'rxjs';
 import { AccountService } from 'src/app/services/account.service';
 import { AlertService } from 'src/app/services/alert.service';
 
@@ -184,21 +184,29 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
       }
     }
 
-  Logar(valor:string) { 
-    this.accountService.login(valor).subscribe
-      ((data:any)=>
-       { 
+ Logar(valor: string): void {
+  this.loading = true;
+  this.isProcessing = true;
+
+  this.accountService.login(valor)
+    .pipe(
+      first(),
+      finalize(() => {
+        this.loading = false;
+        this.isProcessing = false;
+      })
+    )
+    .subscribe({
+      next: () => {
         window.location.href = '/cupomeletronico';
-       },
-       (err)=> 
-       { this.alertService.clear();
-         this.alertService.error(err);
-         this.loading = false;
-         this.isProcessing = false;
-         this.restartScanner();
-        } 
-     );
-  }
+      },
+      error: (err) => {
+        this.alertService.clear();
+        this.alertService.error(err);
+        this.restartScanner();
+      }
+    });
+}
 
   Gravar(valor: string) {
 

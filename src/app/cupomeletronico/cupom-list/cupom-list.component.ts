@@ -290,8 +290,7 @@ action!: NgxScannerQrcodeComponent;
       error: (err) => {
 
         this.busy = false;
-        this.alertService.clear();
-        this.alertService.error(err);
+        console.log(err)
         this.restartScanner();
       },
       complete: () => {
@@ -329,7 +328,7 @@ action!: NgxScannerQrcodeComponent;
       },
 
       error: (err) => {
-        this.alertService.error(err);
+        console.log(err)
         this.restartScanner();
       },
       complete: () => {
@@ -402,7 +401,8 @@ action!: NgxScannerQrcodeComponent;
       next: (tempo: number) => {
         this.tempoProducao = (tempo ?? 0) + somaDosSelecionados;
       },
-      error: () => {
+      error: (err) => {
+        console.log(err)
         this.tempoProducao = somaDosSelecionados;
       }
     });
