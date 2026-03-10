@@ -6,7 +6,7 @@ import {
 } from '@angular/core';
 
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 
 import {
   NgxScannerQrcodeComponent,
@@ -14,6 +14,7 @@ import {
   ScannerQRCodeDevice,
   ScannerQRCodeResult
 } from 'ngx-scanner-qrcode';
+import { filter } from 'rxjs';
 import { AccountService } from 'src/app/services/account.service';
 import { AlertService } from 'src/app/services/alert.service';
 
@@ -60,20 +61,32 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
       username: ['', Validators.required]
     });
 
+  this.router.events
+  .pipe(filter(event => event instanceof NavigationEnd))
+  .subscribe(() => {
+
+    if (this.router.url.includes('login')) {
+      this.restartScanner();
+    }
+
+  });
+
+
   }
 
   ngAfterViewInit() {
 
-    setTimeout(() => {
+   setTimeout(() => {
       this.startScanner();
     }, 300);
-
   }
 
   startScanner() {
 
-    if (!this.action) return;
-
+    if (!this.action) {
+     // alert("Scanner não encontrado!");
+      return;
+    }
     this.action.start().subscribe(() => {
 
       this.action.devices.subscribe((devices) => {
@@ -83,25 +96,21 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
           if (!devices || devices.length === 0) return;
 
             const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-            console.log(navigator.userAgent);
+            //alert(navigator.userAgent);
 
              if (isMobile) {
                // 📱 tenta pegar câmera traseira
-                 const backCamera = devices.find(d =>
-                  /back|rear|environment/gi.test(d.label)
-                );
+                 const backCamera = devices.find(d => /back|rear/gi.test(d.label) );
 
-                console.log("Câmeras encontradas:", devices);
-                console.log("Câmera traseira selecionada:", backCamera);
+               // alert("Câmeras encontradas:" +  backCamera);
+                //alert("Câmera traseira selecionada:" +  devices[1].deviceId);
 
-
-               if (backCamera) {
-                 this.action.playDevice(backCamera.deviceId);
-                 this.selectedDeviceId = backCamera.deviceId;
-               }
+         
+                this.changeCamera(backCamera ? backCamera.deviceId : devices[0].deviceId);
+                this.changeCamera(backCamera ? backCamera.deviceId : devices[0].deviceId);  
+              
              }else{
-                this.selectedDeviceId = devices[0].deviceId;
-
+                 this.changeCamera(devices[0].deviceId);
              }
 
       });
@@ -134,19 +143,40 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
 
   restartScanner() {
 
-    this.scannerEnabled = false;
+  this.scannerEnabled = false;
+
+  setTimeout(() => {
+
+    this.scannerEnabled = true;
 
     setTimeout(() => {
-      this.scannerEnabled = true;
+      this.startScanner();
     }, 200);
 
-  }
+  }, 200);
+
+}
+
+   handle(action: any, fn: string): void {
+      
+      const playDeviceFacingBack = (devices: ScannerQRCodeDevice[]) => {
+        // front camera or back camera check here!
+        const device = devices.find(f => (/back|rear|environment/gi.test(f.label))); // Default Back Facing Camera
+        action.playDevice(device ? device.deviceId : devices[0].deviceId);
+      }
+    
+      if (fn === 'start') {
+        action[fn](playDeviceFacingBack).subscribe((r: any) => console.log(fn, r), alert);
+      } else {
+        action[fn]().subscribe((r: any) => console.log(fn, r), alert);
+      }
+    }
 
   Logar(valor:string) { 
     this.accountService.login(valor).subscribe
       ((data:any)=>
        { 
-        this.router.navigate(['/cupomeletronico']);
+        window.location.href = '/cupomeletronico';
        },
        (err)=> 
        { this.alertService.clear();

@@ -20,7 +20,7 @@
           <div class="row justify-content-center mb-4">
             <div class="col-auto d-flex gap-3">
                <button class="btn btn-info" (click)="startScanner()"> Iniciar Camera </button> 
-               <button class="btn btn-warning" (click)="restartScanner()"> Restartar Camera </button> 
+               <button class="btn btn-warning" (click)="handle(action, action.isPause ? 'play' : 'pause')"> Restartar Camera </button> 
             </div>
           </div>
            <!-- FORM LOGIN -->

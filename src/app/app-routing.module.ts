@@ -15,7 +15,7 @@ const routes: Routes = [
     
   { path: '', component: HomeComponent, canActivate: [AuthGuard] },
   { path: 'account', loadChildren: accountModule },
- { path: 'cupomeletronico', loadChildren: cupomModule, canActivate: [AuthGuard] },
+ { path:  'cupomeletronico', loadChildren: cupomModule, canActivate: [AuthGuard] },
   { path: '404', component : NotFoundComponent},
   { path: '500', component: InternalServerComponent },
   //{ path: 'caixa', loadChildren: CaixaModule, canActivate: [AuthGuard] },

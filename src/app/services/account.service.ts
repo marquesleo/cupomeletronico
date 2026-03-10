@@ -157,7 +157,7 @@ export class AccountService {
         this.stopRefreshTokenTimer();
         var user: User = new User();
         this.userSubject.next(user);
-        this.router.navigate(['/account/login']);
+        window.location.href = '/account/login';
      }
 
     setUser(User:User, token:string){

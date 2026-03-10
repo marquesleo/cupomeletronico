@@ -350,13 +350,13 @@ action!: NgxScannerQrcodeComponent;
                  const backCamera = devices.find(d =>
                   /back|rear|environment/gi.test(d.label)
                 );
-
-               if (backCamera) {
-                 this.action.playDevice(backCamera.deviceId);
-               }
-             }
-
-            // 💻 no desktop não força nada (mantém padrão)
+               
+                 this.action.playDevice(backCamera ? backCamera.deviceId : devices[0].deviceId);
+                 
+                }else {
+                   this.action.playDevice(devices[0].deviceId);
+                }
+                
 
       });
 
