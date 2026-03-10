@@ -50,7 +50,6 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
   constructor(
     private formBuilder: FormBuilder,
     private router: Router,
-    private route: ActivatedRoute,
     private accountService: AccountService,
     private alertService: AlertService,
   ) {}
@@ -129,13 +128,24 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
 
   }
 
+  isProcessing = false;
+  lastCode: string | null = null;
+
   onEvent(qrcode: ScannerQRCodeResult[]) {
 
-    if (!qrcode || qrcode.length === 0) return;
+    if (!qrcode?.length) return;
 
     const valor = qrcode[0].value;
 
-    this.action.pause().subscribe();
+    // evita leituras repetidas
+    if (this.isProcessing) return;
+
+    if (this.lastCode === valor) return;
+
+    this.isProcessing = true;
+    this.lastCode = valor;
+
+    this.action.stop().subscribe(); // desliga a câmera
 
     this.Logar(valor);
 
@@ -143,17 +153,19 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
 
   restartScanner() {
 
-  this.scannerEnabled = false;
+   this.isProcessing = false;
+   this.lastCode = null;
+   this.scannerEnabled = false;
+  
+   setTimeout(() => {
 
-  setTimeout(() => {
+      this.scannerEnabled = true;
 
-    this.scannerEnabled = true;
+      setTimeout(() => {
+        this.startScanner();
+      }, 300);
 
-    setTimeout(() => {
-      this.startScanner();
     }, 200);
-
-  }, 200);
 
 }
 
@@ -182,6 +194,8 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
        { this.alertService.clear();
          this.alertService.error(err);
          this.loading = false;
+         this.isProcessing = false;
+         this.restartScanner();
         } 
      );
   }

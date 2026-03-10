@@ -6,7 +6,7 @@ import { NgxScannerQrcodeComponent, NgxScannerQrcodeService, ScannerQRCodeConfig
 import { AccountService } from 'src/app/services/account.service';
 import { CardData } from 'src/app/models/card';
 import { OperacoesService } from 'src/app/services/operacoes.service';
-import { first } from 'rxjs';
+import { finalize, first } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent, ConfirmDialogModel } from 'src/app/componentes/confirmation-dialog/confirmation-dialog.component';
 import { AlertDialogComponent } from 'src/app/componentes/alert-dialog/alert-dialog.component';
@@ -38,10 +38,7 @@ export class CupomListComponent implements AfterViewInit {
   public paginaAtual = 1;
   public busy: boolean = false;
 
- //  MediaDeviceInfo : MediaDeviceInfo = null!;
- // @ViewChild(QrScannerComponent) qrScannerComponent: QrScannerComponent ;
-
- public config: ScannerQRCodeConfig = {
+  public config: ScannerQRCodeConfig = {
   // fps: 1000,
   vibrate: 400,
   // isBeep: true,
@@ -56,7 +53,7 @@ export class CupomListComponent implements AfterViewInit {
 };
 
 public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
-
+scannerEnabled = true;
 
 @ViewChild('action')
 set scanner(content: NgxScannerQrcodeComponent) {
@@ -77,7 +74,6 @@ action!: NgxScannerQrcodeComponent;
                 private router:Router) 
     {
      this.user = this.accountService.userValue;
-        
     }
 
     onScanSuccess(qrCode: Event) {
@@ -113,13 +109,29 @@ action!: NgxScannerQrcodeComponent;
     ngAfterViewInit(): void {
       
       this.Listar(this.user.id);
- 
-    
+  
     }
     private lstEmlote:string[] = [];
     
+    isProcessing = false;
+    lastCode: string | null = null;
+
     public onEvent(qrcode: ScannerQRCodeResult[], action?: any): void {
-      qrcode?.length && action && action.pause(); // Detect once and pause scan!
+      
+      if (!qrcode?.length) return;
+
+      const valor = qrcode[0].value;
+
+      // evita leituras repetidas
+      if (this.isProcessing) return;
+
+      if (this.lastCode === valor) return;
+
+      this.isProcessing = true;
+      this.lastCode = valor;
+
+      this.action.stop().subscribe(); // desliga a câmera
+           
       if (!this.emlote)
           this.pacote = '';
 
@@ -141,12 +153,9 @@ action!: NgxScannerQrcodeComponent;
             }
          }else 
          {
-          
-          this.lstEmlote.push(qrcode[0].value);
-          this.ListarPorNumeroDoPacote(qrcode[0].value);
+            this.lstEmlote.push(qrcode[0].value);
+            this.ListarPorNumeroDoPacote(qrcode[0].value);
          }
-          
-        
       }
     }
     
@@ -252,85 +261,101 @@ action!: NgxScannerQrcodeComponent;
       return this.cardData.slice(startIndex, endIndex);
     }
     
-    ListarPorNumeroDoPacote(numeroDoPacote:any){
-      this.busy = true;
-      this.filtrouPorUsuario = false;
-      this.cardData = [];
-      
-      if (this.emlote)
-      {
-    
-         this.operacaoService.getByIdPacotes(this.pacote)
-            .pipe(first ())
-            .subscribe((card:CardData[])=> { 
-              this.alertService.clear();
-              this.cardData = card;
-              this.busy = false;
-            },
-          (err)=> {
-            this.busy = false;
-            this.alertService.clear();
-            this.alertService.error(err,);
-         }
-      );
-     }
-    
-     else 
-    {
-      this.operacaoService.getByIdPacote(numeroDoPacote)
-            .pipe(first ())
-            .subscribe((card:CardData[])=> { 
-              this.alertService.clear();
-              this.cardData = [];
-               this.cardData.push(...card);
-               this.busy = false;
-            },
-          (err)=> {
-            this.busy = false;
-            this.alertService.clear();
-            this.alertService.error(err,);
-         }
-        );
-    }
-     this.lstEmlote = [];
-    }
-    
-    Listar(valor :number):void {
-      this.busy = true;
-      this.filtrouPorUsuario = false;
-      this.pacote = '';
-      this.cardData =[];
-      this.operacaoService.getAll(valor)
-      .pipe(first ())
-      .subscribe((card:CardData[])=> { 
-          this.cardData =[];
+   ListarPorNumeroDoPacote(numeroDoPacote: any) {
+
+    this.busy = true;
+    this.filtrouPorUsuario = false;
+    this.cardData = [];
+    this.lstEmlote = [];
+
+    const request$ = this.emlote
+        ? this.operacaoService.getByIdPacotes(this.pacote)
+        : this.operacaoService.getByIdPacote(numeroDoPacote);
+
+  request$
+    .pipe(first())
+    .subscribe({
+      next: (card: CardData[]) => {
+
+        this.alertService.clear();
+
+        if (this.emlote) {
           this.cardData = card;
-          this.RetornarTempo(this.user?.id, 0);
+        } else {
+          this.cardData.push(...card);
+        }
 
-          if (this.cardData?.length == 0){
-            
-            setTimeout(() => {
-               this.IniciarCamera();
-             }, 300);
-
-          }
-          else
-          {
-            this.filtrouPorUsuario = true;
-          }
-          this.busy = false;
-          
-      },
-      (err)=> {
         this.busy = false;
-        this.alertService.error(err);
-        setTimeout(() => {
-          this.IniciarCamera();
-        }, 300);
       },
-      
-      );
-    }
+      error: (err) => {
+
+        this.busy = false;
+        this.alertService.clear();
+        this.alertService.error(err);
+        this.restartScanner();
+      },
+      complete: () => {
+          this.isProcessing = false;
+          this.lastCode = '';
+      }
+    });
+}
+    
+  Listar(valor: number): void {
+
+  this.busy = true;
+  this.filtrouPorUsuario = false;
+  this.pacote = '';
+  this.cardData = [];
+
+  this.operacaoService.getAll(valor)
+    .pipe(
+      first(),
+      finalize(() => this.busy = false)
+    )
+    .subscribe({
+      next: (card: CardData[]) => {
+
+        this.cardData = card;
+
+        this.RetornarTempo(this.user?.id, 0);
+
+        if (card.length === 0) {
+          setTimeout(() => this.IniciarCamera(), 300);
+        } else {
+          this.filtrouPorUsuario = true;
+        }
+
+      },
+
+      error: (err) => {
+        this.alertService.error(err);
+        this.restartScanner();
+      },
+      complete: () => {
+        this.isProcessing = false;
+         this.lastCode = '';
+      }   
+    });
+}
+
+  restartScanner() {
+
+   this.isProcessing = false;
+   this.lastCode = null;
+   this.scannerEnabled = false;
+  
+   setTimeout(() => {
+
+      this.scannerEnabled = true;
+
+      setTimeout(() => {
+        this.IniciarCamera();
+      }, 300);
+
+    }, 200);
+
+}
 
 
     IniciarCamera(){
@@ -366,25 +391,22 @@ action!: NgxScannerQrcodeComponent;
 }
 
 
-    RetornarTempo(valor :number,somaDosSelecionados:number): void {
-      this.busy = true;
-    
-      this.operacaoService.getTempoDeProducao(valor)
-      .pipe(first ())
-      .subscribe((tempo:number) => { 
-          this.tempoProducao = tempo;
-          if (!this.tempoProducao)
-              this.tempoProducao = 0;
-          this.tempoProducao += somaDosSelecionados;
-          this.busy = false;
-          
+ RetornarTempo(valor: number, somaDosSelecionados: number): void {
+  this.busy = true;
+  this.operacaoService.getTempoDeProducao(valor)
+    .pipe(
+      first(),
+      finalize(() => this.busy = false)
+    )
+    .subscribe({
+      next: (tempo: number) => {
+        this.tempoProducao = (tempo ?? 0) + somaDosSelecionados;
       },
-      (err)=> {
-        this.busy = false;
-      },
-      
-      );
-    }
+      error: () => {
+        this.tempoProducao = somaDosSelecionados;
+      }
+    });
+}
     
     receberValor(valorRecebido:number) {
       var somaElementos:number = 0; // Zera o valor para evitar que a soma acumule em chamadas repetidas.
@@ -415,8 +437,7 @@ action!: NgxScannerQrcodeComponent;
       .subscribe({
           next: () => {
             this.Confirmacao();
-          
-          
+                   
             if (this.filtrouPorUsuario) {
                   this.Listar(this.user.id);
             }else {
