@@ -268,7 +268,10 @@ action!: NgxScannerQrcodeComponent;
     this.cardData = [];
     this.lstEmlote = [];
 
-    const request$ = this.emlote
+
+    if (numeroDoPacote.length > 0 || this.pacote.length > 0) {
+    
+  const request$ = this.emlote
         ? this.operacaoService.getByIdPacotes(this.pacote)
         : this.operacaoService.getByIdPacote(numeroDoPacote);
 
@@ -296,8 +299,10 @@ action!: NgxScannerQrcodeComponent;
       complete: () => {
           this.isProcessing = false;
           this.lastCode = '';
+          this.RetornarTempo(this.user?.id, 0);
       }
     });
+  }
 }
     
   Listar(valor: number): void {
@@ -317,10 +322,8 @@ action!: NgxScannerQrcodeComponent;
 
         this.cardData = card;
 
-        this.RetornarTempo(this.user?.id, 0);
-
         if (card.length === 0) {
-          setTimeout(() => this.IniciarCamera(), 300);
+              setTimeout(() => this.IniciarCamera(), 300);
         } else {
           this.filtrouPorUsuario = true;
         }
@@ -333,9 +336,11 @@ action!: NgxScannerQrcodeComponent;
       },
       complete: () => {
         this.isProcessing = false;
-         this.lastCode = '';
+        this.lastCode = '';
+        this.RetornarTempo(this.user?.id, 0);
       }   
     });
+  
 }
 
   restartScanner() {
@@ -438,10 +443,8 @@ action!: NgxScannerQrcodeComponent;
           next: () => {
             this.Confirmacao();
                    
-            if (this.filtrouPorUsuario) {
-                  this.Listar(this.user.id);
-            }else {
-                  this.ListarPorNumeroDoPacote(this.pacote);
+            if (!this.filtrouPorUsuario) {
+                this.ListarPorNumeroDoPacote(this.pacote);
             }
           },
           error: error => {

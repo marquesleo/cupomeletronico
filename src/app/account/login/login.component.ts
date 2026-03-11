@@ -59,18 +59,6 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
     this.form = this.formBuilder.group({
       username: ['', Validators.required]
     });
-
-  this.router.events
-  .pipe(filter(event => event instanceof NavigationEnd))
-  .subscribe(() => {
-
-    if (this.router.url.includes('login')) {
-      this.restartScanner();
-    }
-
-  });
-
-
   }
 
   ngAfterViewInit() {
