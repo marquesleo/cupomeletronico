@@ -2,7 +2,8 @@ import {
   Component,
   ViewChild,
   AfterViewInit,
-  OnDestroy
+  OnDestroy,
+  Output
 } from '@angular/core';
 
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -18,6 +19,17 @@ import { filter, finalize, first } from 'rxjs';
 import { AccountService } from 'src/app/services/account.service';
 import { AlertService } from 'src/app/services/alert.service';
 
+
+  enum ScannerState {
+  INIT = 'INIT',
+  STARTING_CAMERA = 'STARTING_CAMERA',
+  SCANNING = 'SCANNING',
+  QR_DETECTED = 'QR_DETECTED',
+  LOGGING_IN = 'LOGGING_IN',
+  SUCCESS = 'SUCCESS',
+  ERROR = 'ERROR',
+  RESTARTING = 'RESTARTING'
+}
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html'
@@ -27,11 +39,12 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
   form!: FormGroup;
   loading = false;
   submitted = false;
-
   scannerEnabled = true;
-
   devices: ScannerQRCodeDevice[] = [];
   selectedDeviceId!: string;
+  state: ScannerState = ScannerState.INIT;
+  
+
 
   @ViewChild('action')
   action!: NgxScannerQrcodeComponent;
@@ -61,10 +74,47 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
     });
   }
 
+  setState(newState: ScannerState) {
+
+  this.state = newState;
+  console.log("STATE:", newState);
+
+  switch (newState) {
+
+    case ScannerState.STARTING_CAMERA:
+      this.startScanner();
+      break;
+
+    case ScannerState.SCANNING:
+      this.isProcessing = false;
+      break;
+
+    case ScannerState.QR_DETECTED:
+      this.action.stop().subscribe();
+      break;
+
+    case ScannerState.LOGGING_IN:
+      break;
+
+    case ScannerState.SUCCESS:
+      window.location.href = '/cupomeletronico';
+      break;
+
+    case ScannerState.ERROR:
+      this.restartScanner();
+      break;
+
+    case ScannerState.RESTARTING:
+      this.restartScanner();
+      break;
+  }
+}
+
+
   ngAfterViewInit() {
 
    setTimeout(() => {
-      this.startScanner();
+      this.setState(ScannerState.STARTING_CAMERA);
     }, 300);
   }
 
@@ -88,17 +138,18 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
              if (isMobile) {
                // 📱 tenta pegar câmera traseira
                  const backCamera = devices.find(d => /back|rear/gi.test(d.label) );
-
                // alert("Câmeras encontradas:" +  backCamera);
-                //alert("Câmera traseira selecionada:" +  devices[1].deviceId);
+               //alert("Câmera traseira selecionada:" +  devices[1].deviceId);
 
          
                 this.changeCamera(backCamera ? backCamera.deviceId : devices[0].deviceId);
-                this.changeCamera(backCamera ? backCamera.deviceId : devices[0].deviceId);  
+                
               
              }else{
                  this.changeCamera(devices[0].deviceId);
              }
+
+             this.setState(ScannerState.SCANNING);
 
       });
 
@@ -119,21 +170,17 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
   isProcessing = false;
   lastCode: string | null = null;
 
-  onEvent(qrcode: ScannerQRCodeResult[]) {
+  onEvent(qrcode:ScannerQRCodeResult[]): void{
 
-    if (!qrcode?.length) return;
+    if (this.state !== ScannerState.SCANNING) return;
 
-    const valor = qrcode[0].value;
+     if (!qrcode?.length) return;
 
-    // evita leituras repetidas
-    if (this.isProcessing) return;
+      const valor = qrcode[0].value;
 
-    if (this.lastCode === valor) return;
+      this.lastCode = valor;
 
-    this.isProcessing = true;
-    this.lastCode = valor;
-
-    this.action.stop().subscribe(); // desliga a câmera
+     this.setState(ScannerState.QR_DETECTED);
 
     this.Logar(valor);
 
@@ -141,16 +188,16 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
 
   restartScanner() {
 
-   this.isProcessing = false;
-   this.lastCode = null;
-   this.scannerEnabled = false;
+   this.state = ScannerState.RESTARTING;
+
+  this.scannerEnabled = false;
   
    setTimeout(() => {
 
       this.scannerEnabled = true;
 
       setTimeout(() => {
-        this.startScanner();
+        this.setState(ScannerState.STARTING_CAMERA);
       }, 300);
 
     }, 200);
@@ -173,25 +220,21 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
     }
 
  Logar(valor: string): void {
-  this.loading = true;
-  this.isProcessing = true;
+   
+  this.setState(ScannerState.LOGGING_IN);
 
   this.accountService.login(valor)
     .pipe(
-      first(),
-      finalize(() => {
-        this.loading = false;
-        this.isProcessing = false;
-      })
-    )
+      first())
     .subscribe({
       next: () => {
-        window.location.href = '/cupomeletronico';
+        this.setState(ScannerState.SUCCESS);
       },
       error: (err) => {
         this.alertService.clear();
         this.alertService.error(err);
-        this.restartScanner();
+        this.setState(ScannerState.ERROR);
+
       }
     });
 }

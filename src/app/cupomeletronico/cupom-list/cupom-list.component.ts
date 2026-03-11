@@ -12,6 +12,17 @@ import { ConfirmationDialogComponent, ConfirmDialogModel } from 'src/app/compone
 import { AlertDialogComponent } from 'src/app/componentes/alert-dialog/alert-dialog.component';
 import { User } from 'src/app/models';
 
+export enum ScannerState {
+  IDLE = 'IDLE',
+  STARTING_CAMERA = 'STARTING_CAMERA',
+  SCANNING = 'SCANNING',
+  PROCESSING = 'PROCESSING',
+  LOADING_DATA = 'LOADING_DATA',
+  SUCCESS = 'SUCCESS',
+  ERROR = 'ERROR',
+  STOPPED = 'STOPPED'
+}
+
 
 @Component({
   selector: 'app-cupom-list',
@@ -52,6 +63,8 @@ export class CupomListComponent implements AfterViewInit {
   } 
 };
 
+state: ScannerState = ScannerState.IDLE;
+
 public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
 scannerEnabled = true;
 
@@ -76,11 +89,11 @@ action!: NgxScannerQrcodeComponent;
      this.user = this.accountService.userValue;
     }
 
-    onScanSuccess(qrCode: Event) {
-      this.disableScanner = true; // desabilita o scanner após a leitura do QR code
+    private setState(newState: ScannerState) {
+        console.log(`STATE: ${this.state} → ${newState}`);
+        this.state = newState;    
     }
-    
-    
+   
     ngOnInit() {
     
      //this.RetornarTempo(this.user.id,0);
@@ -107,9 +120,9 @@ action!: NgxScannerQrcodeComponent;
     
     
     ngAfterViewInit(): void {
-      
+      this.setState(ScannerState.STARTING_CAMERA);
       this.Listar(this.user.id);
-  
+       
     }
     private lstEmlote:string[] = [];
     
@@ -120,17 +133,15 @@ action!: NgxScannerQrcodeComponent;
       
       if (!qrcode?.length) return;
 
+      if (this.state !== ScannerState.SCANNING) return;
+
       const valor = qrcode[0].value;
 
-      // evita leituras repetidas
-      if (this.isProcessing) return;
+      if (!this.emlote) {
+        this.setState(ScannerState.PROCESSING);
 
-      if (this.lastCode === valor) return;
-
-      this.isProcessing = true;
-      this.lastCode = valor;
-
-      this.action.stop().subscribe(); // desliga a câmera
+        this.action.stop().subscribe();
+      }
            
       if (!this.emlote)
           this.pacote = '';
@@ -225,17 +236,7 @@ action!: NgxScannerQrcodeComponent;
     
     
     excluirLista(){
-     /*  if (this.action) {
-           this.IniciarCamera();
-      } else {
-         this.IniciarCamera();
-      }
-      this.searchText = '';
-      this.pacote = '';
-      this.cardData= [];
-      this.canceling = false;
-      */
-     this.ngAfterViewInit();
+      this.ngAfterViewInit();
     }
     
     ListarPorNumeroDoPacoteDireto(){
@@ -267,7 +268,7 @@ action!: NgxScannerQrcodeComponent;
     this.filtrouPorUsuario = false;
     this.cardData = [];
     this.lstEmlote = [];
-
+    this.setState(ScannerState.LOADING_DATA);
 
     if (numeroDoPacote.length > 0 || this.pacote.length > 0) {
     
@@ -287,19 +288,18 @@ action!: NgxScannerQrcodeComponent;
         } else {
           this.cardData.push(...card);
         }
-
         this.busy = false;
+        this.setState(ScannerState.SUCCESS);
       },
       error: (err) => {
-
+        
+        this.setState(ScannerState.ERROR);
         this.busy = false;
         console.log(err)
         this.restartScanner();
       },
       complete: () => {
-          this.isProcessing = false;
-          this.lastCode = '';
-          this.RetornarTempo(this.user?.id, 0);
+         this.RetornarTempo(this.user?.id, 0);
       }
     });
   }
@@ -345,53 +345,25 @@ action!: NgxScannerQrcodeComponent;
 
   restartScanner() {
 
-   this.isProcessing = false;
-   this.lastCode = null;
-   this.scannerEnabled = false;
-  
-   setTimeout(() => {
+   this.setState(ScannerState.STARTING_CAMERA);
 
-      this.scannerEnabled = true;
+  setTimeout(() => {
 
-      setTimeout(() => {
-        this.IniciarCamera();
-      }, 300);
+    this.IniciarCamera();
 
-    }, 200);
+  }, 300);
 
 }
 
 
-    IniciarCamera(){
-      if (!this.action) return;
-       this.action.isReady.subscribe(() => {
+  IniciarCamera(){
+     if (!this.action) return;
 
-           this.action.start().subscribe(() => {
+      this.action.start().subscribe(() => {
 
-           this.action.devices.subscribe((devices) => {
-
-           if (!devices || devices.length === 0) return;
-
-            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-             if (isMobile) {
-               // 📱 tenta pegar câmera traseira
-                 const backCamera = devices.find(d =>
-                  /back|rear|environment/gi.test(d.label)
-                );
-               
-                 this.action.playDevice(backCamera ? backCamera.deviceId : devices[0].deviceId);
-                 
-                }else {
-                   this.action.playDevice(devices[0].deviceId);
-                }
-                
-
-      });
+         this.setState(ScannerState.SCANNING);   
 
     });
-
-  });
 }
 
 
@@ -442,10 +414,7 @@ action!: NgxScannerQrcodeComponent;
       .subscribe({
           next: () => {
             this.Confirmacao();
-                   
-            if (!this.filtrouPorUsuario) {
-                this.ListarPorNumeroDoPacote(this.pacote);
-            }
+            this.excluirLista();
           },
           error: error => {
               this.loading = false;
@@ -456,7 +425,7 @@ action!: NgxScannerQrcodeComponent;
           },
           complete: ()=> {
             this.loading = false;
-            this.excluirLista();
+            
             
           }
       });
