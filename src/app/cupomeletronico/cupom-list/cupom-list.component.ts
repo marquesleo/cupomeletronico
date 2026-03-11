@@ -357,14 +357,51 @@ action!: NgxScannerQrcodeComponent;
 
 
   IniciarCamera(){
-     if (!this.action) return;
+     this.startScanner()
 
-      this.action.start().subscribe(() => {
+  }
 
-         this.setState(ScannerState.SCANNING);   
+  startScanner() {
+
+    if (!this.action) {
+     // alert("Scanner não encontrado!");
+      return;
+    }
+    this.action.start().subscribe(() => {
+
+      this.action.devices.subscribe((devices) => {
+    
+          if (!devices || devices.length === 0) return;
+
+            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+            //alert(navigator.userAgent);
+
+             if (isMobile) {
+               // 📱 tenta pegar câmera traseira
+                 const backCamera = devices.find(d => /back|rear/gi.test(d.label) );
+               // alert("Câmeras encontradas:" +  backCamera);
+               //alert("Câmera traseira selecionada:" +  devices[1].deviceId);
+         
+                this.changeCamera(backCamera ? backCamera.deviceId : devices[0].deviceId);
+                this.setState(ScannerState.SCANNING);
+              
+             }else{
+                 this.changeCamera(devices[0].deviceId);
+             }            
+
+      });
 
     });
-}
+
+  }
+
+  changeCamera(deviceId: string) {
+ 
+    if (this.action) {
+      this.action.playDevice(deviceId);
+    }
+
+  }
 
 
  RetornarTempo(valor: number, somaDosSelecionados: number): void {
