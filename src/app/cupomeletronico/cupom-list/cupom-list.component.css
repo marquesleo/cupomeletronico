@@ -1,7 +1,9 @@
 .content {
     padding: 16px;
   }
-  
+  .checkbox {
+    margin-left: 21px; /* Ajuste o valor conforme desejado */
+  }
   .content > mat-card {
     width: 200px;
   }
@@ -22,3 +24,4 @@
     margin-right: 8px;
     font-size: 1rem;
   }
+

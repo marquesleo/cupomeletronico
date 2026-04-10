@@ -29,12 +29,11 @@ import { InternalServerComponent } from './componentes/error-pages/internal-serv
 import { CorsInterceptor } from './helpers/CorsInterceptor';
 import { ConfirmationDialogComponent } from './componentes/confirmation-dialog/confirmation-dialog.component';
 import { ConfirmationDialogService } from './componentes/confirmation-dialog/confirmation-dialog.service';
-import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatDialogModule } from '@angular/material/dialog';
-
 
 import { HttpClient } from '@angular/common/http';
 import { AlertDialogComponent } from './componentes/alert-dialog/alert-dialog.component';
+
 
 export const loadEnvironmentConfig = (http: HttpClient) => {
   return () => {
@@ -62,8 +61,6 @@ export const loadEnvironmentConfig = (http: HttpClient) => {
     ConfirmationDialogComponent,
     AlertDialogComponent,
      
-    
-    
   ],
   imports: [
     BrowserModule,
@@ -84,21 +81,22 @@ export const loadEnvironmentConfig = (http: HttpClient) => {
     MatDatepickerModule,
     MatNativeDateModule, 
     MatDatepickerModule,
-     
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: environment.production,
       // Register the ServiceWorker as soon as the application is stable
       // or after 30 seconds (whichever comes first).
       registrationStrategy: 'registerWhenStable:30000'
     }),
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+    
+
   ],
   providers: [
     ConfirmationDialogService,
     { provide: HTTP_INTERCEPTORS, useClass: CorsInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
-    { provide: APP_INITIALIZER, useFactory: appInitializer, multi: true, deps: [AccountService] },
+    //{ provide: APP_INITIALIZER, useFactory: appInitializer, multi: true, deps: [AccountService] },
     { provide: APP_INITIALIZER, useFactory: loadEnvironmentConfig, multi: true, deps: [HttpClient] },
   ],
   entryComponents: [ ConfirmationDialogComponent ],

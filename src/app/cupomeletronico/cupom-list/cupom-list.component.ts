@@ -4,15 +4,24 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AlertService } from 'src/app/services/alert.service';
 import { NgxScannerQrcodeComponent, NgxScannerQrcodeService, ScannerQRCodeConfig, ScannerQRCodeDevice, ScannerQRCodeResult, ScannerQRCodeSelectedFiles } from 'ngx-scanner-qrcode';
 import { AccountService } from 'src/app/services/account.service';
-import { Alert, User } from 'src/app/models';
 import { CardData } from 'src/app/models/card';
 import { OperacoesService } from 'src/app/services/operacoes.service';
-import { first } from 'rxjs';
+import { finalize, first } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent, ConfirmDialogModel } from 'src/app/componentes/confirmation-dialog/confirmation-dialog.component';
-import { delay } from 'rxjs';
-import { AlertComponent } from 'src/app/componentes/alert/alert.component';
 import { AlertDialogComponent } from 'src/app/componentes/alert-dialog/alert-dialog.component';
+import { User } from 'src/app/models';
+
+export enum ScannerState {
+  IDLE = 'IDLE',
+  STARTING_CAMERA = 'STARTING_CAMERA',
+  SCANNING = 'SCANNING',
+  PROCESSING = 'PROCESSING',
+  LOADING_DATA = 'LOADING_DATA',
+  SUCCESS = 'SUCCESS',
+  ERROR = 'ERROR',
+  STOPPED = 'STOPPED'
+}
 
 
 @Component({
@@ -27,18 +36,20 @@ export class CupomListComponent implements AfterViewInit {
   disableScanner = false;
   form!: FormGroup ;
   loading = false;
+  tempoProducao:number=0;
   canceling = false;
   submitted = false;
   produto:string="";
   nomeDoOperador:string="";
   pageSize = 10;
+  pacote:string='';
+  filtrouPorUsuario = false;
+  searchText:string='';
+  emlote:boolean = false;
   public paginaAtual = 1;
   public busy: boolean = false;
 
- //  MediaDeviceInfo : MediaDeviceInfo = null!;
- // @ViewChild(QrScannerComponent) qrScannerComponent: QrScannerComponent ;
-
- public config: ScannerQRCodeConfig = {
+  public config: ScannerQRCodeConfig = {
   // fps: 1000,
   vibrate: 400,
   // isBeep: true,
@@ -52,10 +63,20 @@ export class CupomListComponent implements AfterViewInit {
   } 
 };
 
+state: ScannerState = ScannerState.IDLE;
+
 public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
+scannerEnabled = true;
 
+@ViewChild('action')
+set scanner(content: NgxScannerQrcodeComponent) {
+  if (content) {
+    this.action = content;
+    
+  }
+}
 
-@ViewChild('action') action: NgxScannerQrcodeComponent
+action!: NgxScannerQrcodeComponent;
 
     constructor(private accountService: AccountService,
                 private formBuilder: FormBuilder,
@@ -66,25 +87,19 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
                 private router:Router) 
     {
      this.user = this.accountService.userValue;
-     document.addEventListener('focusin', (e) => {
-  const target = e.target as HTMLElement;
-
-  if (target.closest('ngx-scanner-qrcode')) {
-    target.blur();
-  }
-});
     }
 
-    onScanSuccess(qrCode: Event) {
-      console.log(qrCode.target);
-      this.disableScanner = true; // desabilita o scanner após a leitura do QR code
+    private setState(newState: ScannerState) {
+        console.log(`STATE: ${this.state} → ${newState}`);
+        this.state = newState;    
     }
-    
-    
+   
     ngOnInit() {
     
+     //this.RetornarTempo(this.user.id,0);
       if (!this.user.utilizaCupom){
-        this.alertService.warn("Usuário não habilitado para cupom eletrônico!");
+        this.Aviso("Usuário não habilitado para cupom eletrônico!");
+    
         this.router.navigate(['/cupomeletronico']);
       }else{
 
@@ -95,46 +110,69 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
         pacote: [, Validators.required],
        
       });
+      
     }
+   
     }
     
     // convenience getter for easy access to form fields
     get f() { return this.form.controls; }
     
     
-  ngAfterViewInit(): void {
-  setTimeout(() => {
-
-    document.addEventListener('focusin', (e) => {
-  const target = e.target as HTMLElement;
-
-  if (target.closest('ngx-scanner-qrcode')) {
-    target.blur();
-  }
-});
-
-    this.Listar(this.user.id);
-  });
-}
+    ngAfterViewInit(): void {
+      this.setState(ScannerState.STARTING_CAMERA);
+      this.Listar(this.user.id);
+       
+    }
+    private lstEmlote:string[] = [];
+    
+    isProcessing = false;
+    lastCode: string | null = null;
 
     public onEvent(qrcode: ScannerQRCodeResult[], action?: any): void {
-      qrcode?.length && action && action.pause(); // Detect once and pause scan!
-      console.log(qrcode);
+      
+      if (!qrcode?.length) return;
+
+      if (this.state !== ScannerState.SCANNING) return;
+
+      const valor = qrcode[0].value;
+
+      if (!this.emlote) {
+        this.setState(ScannerState.PROCESSING);
+
+        this.action.stop().subscribe();
+      }
+           
+      if (!this.emlote)
+          this.pacote = '';
+
       if (qrcode.length > 0){
-        const valor = Number(qrcode[0].value);
-        this.ListarPorNumeroDoPacote(valor);
-        
+         if (this.emlote)
+         {
+            if (this.pacote.length > 0){
+
+              if (!this.lstEmlote.includes(qrcode[0].value)) {
+                this.lstEmlote.push(qrcode[0].value);
+                this.pacote = qrcode[0].value + ',' + this.pacote ;
+              }
+              
+              
+            }
+            else{
+                this.pacote = qrcode[0].value;
+                this.lstEmlote.push(qrcode[0].value);
+            }
+         }else 
+         {
+            this.lstEmlote.push(qrcode[0].value);
+            this.ListarPorNumeroDoPacote(qrcode[0].value);
+         }
       }
     }
     
     
     public handle(action: any, fn: string): void {
       
-        // *** FIX AQUI ***
-         const el = document.activeElement as HTMLElement;
-           if (el && typeof el.blur === 'function') {
-           el.blur();
-         }
       const playDeviceFacingBack = (devices: ScannerQRCodeDevice[]) => {
         // front camera or back camera check here!
         const device = devices.find(f => (/back|rear|environment/gi.test(f.label))); // Default Back Facing Camera
@@ -147,8 +185,7 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
         action[fn]().subscribe((r: any) => console.log(fn, r), alert);
       }
     }
-    
-    
+        
     public onSelects(files: any): void {
       this.qrcode.loadFiles(files).subscribe((res: ScannerQRCodeSelectedFiles[]) => {
         this.qrCodeResult = res;
@@ -160,6 +197,16 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
         data: {
           icon: 'Check',
           message: 'Pacote Enviado com sucesso'
+        }
+      });
+    
+    }
+
+    Aviso(msg:string) {
+      this.dialog.open(AlertDialogComponent, {
+        data: {
+          icon: 'Check',
+          message: msg
         }
       });
     }
@@ -179,107 +226,247 @@ public qrCodeResult: ScannerQRCodeSelectedFiles[] = [];
        
         this.result = dialogResult;
         if (this.result){
-             this.excluirLista();
+          this.excluirLista();
+
         }
+     
       });
+      this.canceling = false;
     }
     
     
     excluirLista(){
-      this.cardData= [];
-      this.canceling = false; 
-      this.form.reset();
-           
-      setTimeout(() => {
-        if (this.action) {
-          this.handle(this.action, 'start');
-       }
-        }, 300);
+      this.ngAfterViewInit();
     }
     
     ListarPorNumeroDoPacoteDireto(){
     
-      if (this.buscaPacote)
-        this.ListarPorNumeroDoPacote(this.buscaPacote);  
+      if (this.pacote)
+        this.ListarPorNumeroDoPacote(this.pacote);  
       else
-        this.alertService.error("Preencha o número do pacote!");  
+        this.Aviso("Preencha o número do pacote!");
+        //this.alertService.error();  
     }
     
-    
-    
-    ListarPorNumeroDoPacote(numeroDoPacote:any){
-      this.busy = true;
-     
-      this.operacaoService.getByIdPacote(numeroDoPacote)
-      .pipe(first ())
-      .subscribe((card:CardData[])=> { 
-          this.alertService.clear();
-          this.cardData = card;
-        
-          this.busy = false;
-          
-      },
-      (err)=> {
-        this.busy = false;
-        this.alertService.clear();
-        this.alertService.error(err,);
-      }
-      );
+    onPageChange(pageNumber: number) {
+      this.paginaAtual = pageNumber;
+         
     }
-    
-    Listar(valor :number):void {
-      this.busy = true;
-     
-      this.operacaoService.getAll(valor)
-      .pipe(first ())
-      .subscribe((card:CardData[])=> { 
-          this.cardData = card;
-          if (this.cardData?.length == 0){
-            this.busy = false;
 
-            this.action.isReady.pipe(delay(1000)).subscribe(() => {
-              this.handle(this.action, 'start');
-            });
-          }
-          this.busy = false;
-          
-      },
-      (err)=> {
-        this.busy = false;
-        this.alertService.error(err);
-      },
+    getCurrentPageData() {
+      // Aqui você deve retornar os dados da página atual com base no pageSize e paginaAtual.
+      // Pode ser feito com a função slice, por exemplo:
       
-      );
+      const startIndex = (this.paginaAtual - 1) * this.pageSize;
+      const endIndex = startIndex + this.pageSize;
+      return this.cardData.slice(startIndex, endIndex);
     }
     
+   ListarPorNumeroDoPacote(numeroDoPacote: any) {
+
+    this.busy = true;
+    this.filtrouPorUsuario = false;
+    this.cardData = [];
+    this.lstEmlote = [];
+    this.setState(ScannerState.LOADING_DATA);
+
+    if (numeroDoPacote.length > 0 || this.pacote.length > 0) {
+    
+  const request$ = this.emlote
+        ? this.operacaoService.getByIdPacotes(this.pacote)
+        : this.operacaoService.getByIdPacote(numeroDoPacote);
+
+  request$
+    .pipe(first())
+    .subscribe({
+      next: (card: CardData[]) => {
+
+        this.alertService.clear();
+
+        if (this.emlote) {
+          this.cardData = card;
+        } else {
+          this.cardData.push(...card);
+        }
+        this.busy = false;
+        this.setState(ScannerState.SUCCESS);
+      },
+      error: (err) => {
+        
+        this.setState(ScannerState.ERROR);
+        this.busy = false;
+        console.log(err)
+        this.restartScanner();
+      },
+      complete: () => {
+         this.RetornarTempo(this.user?.id, 0);
+      }
+    });
+  }
+}
+    
+  Listar(valor: number): void {
+
+  this.busy = true;
+  this.filtrouPorUsuario = false;
+  this.pacote = '';
+  this.cardData = [];
+
+  this.operacaoService.getAll(valor)
+    .pipe(
+      first(),
+      finalize(() => this.busy = false)
+    )
+    .subscribe({
+      next: (card: CardData[]) => {
+
+        this.cardData = card;
+
+        if (card.length === 0) {
+              setTimeout(() => this.IniciarCamera(), 300);
+        } else {
+          this.filtrouPorUsuario = true;
+        }
+
+      },
+
+      error: (err) => {
+        console.log(err)
+        this.restartScanner();
+      },
+      complete: () => {
+        this.isProcessing = false;
+        this.lastCode = '';
+        this.RetornarTempo(this.user?.id, 0);
+      }   
+    });
+  
+}
+
+  restartScanner() {
+
+   this.setState(ScannerState.STARTING_CAMERA);
+
+  setTimeout(() => {
+
+    this.IniciarCamera();
+
+  }, 300);
+
+}
+
+
+  IniciarCamera(){
+     this.startScanner()
+
+  }
+
+  startScanner() {
+
+    if (!this.action) {
+     // alert("Scanner não encontrado!");
+      return;
+    }
+    this.action.start().subscribe(() => {
+
+      this.action.devices.subscribe((devices) => {
+    
+          if (!devices || devices.length === 0) return;
+
+            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+            //alert(navigator.userAgent);
+
+             if (isMobile) {
+               // 📱 tenta pegar câmera traseira
+                 const backCamera = devices.find(d => /back|rear/gi.test(d.label) );
+               // alert("Câmeras encontradas:" +  backCamera);
+               //alert("Câmera traseira selecionada:" +  devices[1].deviceId);
+         
+                this.changeCamera(backCamera ? backCamera.deviceId : devices[0].deviceId);
+                this.setState(ScannerState.SCANNING);
+              
+             }else{
+                 this.changeCamera(devices[0].deviceId);
+             }            
+
+      });
+
+    });
+
+  }
+
+  changeCamera(deviceId: string) {
+ 
+    if (this.action) {
+      this.action.playDevice(deviceId);
+    }
+
+  }
+
+
+ RetornarTempo(valor: number, somaDosSelecionados: number): void {
+  this.busy = true;
+  this.operacaoService.getTempoDeProducao(valor)
+    .pipe(
+      first(),
+      finalize(() => this.busy = false)
+    )
+    .subscribe({
+      next: (tempo: number) => {
+        this.tempoProducao = (tempo ?? 0) + somaDosSelecionados;
+      },
+      error: (err) => {
+        console.log(err)
+        this.tempoProducao = somaDosSelecionados;
+      }
+    });
+}
+    
+    receberValor(valorRecebido:number) {
+      var somaElementos:number = 0; // Zera o valor para evitar que a soma acumule em chamadas repetidas.
+
+      for (let elemento of this.cardData) {
+        if (!elemento.flag)
+            somaElementos += elemento.tempoTotal;
+      }
+      this.RetornarTempo(this.user?.id,somaElementos);
+     
+    }
+
    
      onSubmit() {
-      this.submitted = true;
+     
       this.loading = true;
-      // reset alerts on submit
+      
       this.alertService.clear();
       if (this.cardData.length == 0){
-          this.alertService.error("Nenhum Pacote foi selecionado");
-            this.loading = false;
+        this.Aviso("Nenhum Pacote foi selecionado");
+        this.loading = false;
           return;
       }
+    
+
       this.operacaoService.SalvarPacote(this.cardData)
       .pipe(first())
       .subscribe({
           next: () => {
             this.Confirmacao();
-              this.Listar(this.user.id);
+            this.excluirLista();
           },
           error: error => {
-              this.alertService.error(error);
               this.loading = false;
+               this.Aviso(error);
+              this.alertService.error(error);
+            
+           
           },
           complete: ()=> {
             this.loading = false;
             
+            
           }
       });
-    
+   
      }
 
 }

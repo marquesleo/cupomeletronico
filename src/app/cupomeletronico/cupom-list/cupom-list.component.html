@@ -2,7 +2,15 @@
   <h4 class="card-header">CUPOM ELETRÔNICO</h4>
   <div class="card-body">
 
-<h3>Operador: {{user.nome}}</h3>
+<h3>Operador: {{user.nome}} --- TEMPO DO DIA: {{tempoProducao | number: '1.2-2'}}</h3>
+<div *ngIf="!cardData?.length">
+  <div class="checkbox">
+    <input [(ngModel)]="emlote" id="emlote" type="checkbox" class="form-check-input" >
+    <label for="emlote"  class="form-check-label" >
+        Lançamento em Lote ?
+    </label>
+  </div>
+</div>
 <div *ngIf="!cardData?.length">   
     <div class="row">
   
@@ -26,7 +34,7 @@
 
            <!-- start/stop -->
            <button class="btn" [class.btn-info]="!action.isStart" [class.btn-warning]="action.isStart" [disabled]="action.isLoading" (click)="handle(action, action.isStart ? 'stop' : 'start')">
-<img [src]="action.isStart ? 'https://id1945.github.io/images/svg/camera-off.svg' : 'https://id1945.github.io/images/svg/camera-on.svg'" width="30px"/>
+            <img [src]="action.isStart ? 'https://id1945.github.io/images/svg/camera-off.svg' : 'https://id1945.github.io/images/svg/camera-on.svg'" width="30px"/>
            </button>
 
           <!-- play/pause -->
@@ -36,10 +44,10 @@
     </div>  
   </div>
    <div class="row">
-       <input type="text" class="form-control" [(ngModel)]="buscaPacote" placeholder="Digite sua busca">
+       <input type="text" class="form-control" [(ngModel)]="pacote" placeholder="Digite sua busca">
        <button class="btn btn-primary" (click)="ListarPorNumeroDoPacoteDireto()">Filtrar</button>
-  </div>
- </div>
+  </div> 
+</div>
  
 <br>
 <div *ngIf="busy">
@@ -50,9 +58,24 @@
 
 <div>
 
-
+  <div *ngIf="cardData?.length && paginaAtual == 1">
+    <div class="row">
+      <div class="container search-table">
+          <div class="search-box">
+            <div class="row">
+              
+              <div class="col-sm-12">
+                  <input type="text" class="form-control" placeholder="Filtrar referência da operação..." [(ngModel)]="searchText" />      
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   
-  <div class="row align-center">
+  
+  <div *ngIf="cardData?.length">
+   <div class="row align-center">
    <div class="row">
      <div class="col-sm-6 col-md-4 col-lg-3 col-xs-3" *ngFor="let card of cardData | paginate: { itemsPerPage: pageSize, currentPage: paginaAtual }" [ngClass]="{'mb-3': !cardData.length}">
           <app-card [cardData]="card"></app-card>
@@ -60,7 +83,7 @@
      <pagination-controls (pageChange)="paginaAtual = $event" previousLabel="Anterior" nextLabel="Próximo"></pagination-controls>
    </div>
   </div>
-
+</div>
 
      <!--<button (click)="chamarCamera()">CHAMAR CAMERA</button>
       <button (click)="desahabilitar()">fechar CAMERA</button>
@@ -88,7 +111,7 @@
               <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
               Enviar Pacote
             </button>
-            <button type="button"  (click)="openConfirmationDialog()" [disabled]="loading" class="btn btn-danger" style="margin-left: 5px;">
+            <button type="button"  (click)="openConfirmationDialog()" [disabled]="canceling" class="btn btn-danger" style="margin-left: 5px;">
               <span *ngIf="canceling" class="spinner-border spinner-border-sm mr-1"></span>
               Cancelar
             </button>
@@ -96,9 +119,5 @@
           <!--<a routerLink="../register" class="btn btn-link">Criar Conta</a>-->
         </form>
       </div>
-      
-
-
-     
   </div>
 </div> 

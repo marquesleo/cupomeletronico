@@ -86,16 +86,6 @@ export class AccountService {
 
     private refreshTokenTimeout: any;
 
-    private startRefreshTokenTimer() {
-        // parse json object from base64 encoded jwt token
-        const jwtBase64 = this.userValue!.token!.split('.')[1];
-        const jwtToken = JSON.parse(atob(jwtBase64));
-
-        // set a timeout to refresh the token a minute before it expires
-        const expires = new Date(jwtToken.exp * 1000);
-        const timeout = expires.getTime() - Date.now() - (60 * 1000);
-        this.refreshTokenTimeout = setTimeout(() => this.refreshTokenCupom().subscribe(), timeout);
-    }
 
     private stopRefreshTokenTimer() {
         clearTimeout(this.refreshTokenTimeout);
@@ -125,7 +115,7 @@ export class AccountService {
                         this.setUser(user,user.token);
                         this.userSubject.next(user);
                         this.setCookie(AccountService.refreshTokencupomeletronico,user.token,7);
-                        this.startRefreshTokenTimer();
+                      
                    
                 return user;
             }
@@ -157,7 +147,7 @@ export class AccountService {
         this.stopRefreshTokenTimer();
         var user: User = new User();
         this.userSubject.next(user);
-        this.router.navigate(['/account/login']);
+        window.location.href = '/account/login';
      }
 
     setUser(User:User, token:string){

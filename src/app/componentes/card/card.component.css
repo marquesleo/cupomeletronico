@@ -1,3 +1,9 @@
-.card-disabled {
-  opacity: 0.6;
+.card-spacing {
+    margin-bottom: 20px;
+   
+}
+
+.colored-text {
+    color: black; /* Substitua "blue" pela cor que deseja usar */
+    font-weight: bold;
 }
